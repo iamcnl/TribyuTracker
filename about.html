@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Tribyu</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="img/TribyuLogo.png">
+    <script src="script.js" defer></script>
+</head>
+<body>
+<header class="header">
+  <a href="index.html" class="header-logo-link">
+    <img src="img/TribyuLogo.png" alt="Logo" class="header-logo">
+    <span class="header-title">Tribyu Tracker</span>
+  </a>
+  <div class="nav-container">
+    <nav class="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="detail.html">Detail Stats</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="about.html">About</a>
+    </nav>
+    <div class="menu" onclick="toggleMenu()">☰</div>
+  </div>
+</header>
+<div class="archive-banner">
+    <strong class="archive-banner-title">Tribyu was cancelled in 2025.</strong>
+    <span>This tracker is an archive of data from 10 Feb – 30 Sep 2025 and is no longer updated.</span>
+</div>
+<div class="menu-content" id="menuContent">
+    <div class="theme-toggle">
+        <span class="icon sun" title="Light Mode">☀</span>
+        <label class="switch">
+            <input type="checkbox" id="themeToggle" onchange="toggleDarkMode()">
+            <span class="slider"></span>
+        </label>
+        <span class="icon moon" title="Dark Mode">🌙</span>
+    </div>
+</div>
+
+<main class="about-page">
+    <h1>About Tribyu</h1>
+
+    <section class="about-card">
+        <h2>What it was</h2>
+        <p>Tribyu was a gaming platform that shared its profits with players, with modes such as Survival, Skyblock, ChampClash and Counter-Strike. It grew out of Satlantis, a Bitcoin-based Minecraft server, and was rebranded as Tribyu in February 2025. After the rebrand it ran on Luanti, an open-source engine that is separate from Minecraft.</p>
+    </section>
+
+    <section class="about-card">
+        <h2>How the rewards worked</h2>
+        <p>The game borrowed ideas from Bitcoin mining. Players collected and spent in-game resources for a chance at "block rewards", paid in real satoshis from revenue the game generated.</p>
+        <ul>
+            <li><strong>ASICs</strong> were in-game miners. Each one running added to a player's <em>hashrate</em>. At the 2025 relaunch, ASICs had to be earned in the game, not bought.</li>
+            <li><strong>Joules</strong> were the fuel. Players got them by playing, and an ASIC only produced hashrate while it was powered.</li>
+            <li><strong>The prize pool</strong> held the sats waiting to be paid out. In earlier years it was topped up with ad revenue and a share of what players spent in the game.</li>
+            <li><strong>Payouts</strong> came every hour. As this tracker modelled it, the pool paid out about 1/2400 of its balance per hour (roughly 1% a day), split by hashrate share: your reward = (your hashrate ÷ total hashrate) × the hourly reward.</li>
+            <li><strong>The auction house</strong> let players trade ASICs and Joules for sats. The balance between Joule supply and ASIC consumption was a recurring topic in the community.</li>
+        </ul>
+    </section>
+
+    <section class="about-card">
+        <h2>The end</h2>
+        <p>The team announced that after three years they could no longer sustain the costs of running Tribyu and the project would close. They said they were proud of the 1.41 BTC rewarded to players. Data collection stopped when the game ended.</p>
+    </section>
+
+    <section class="about-card">
+        <h2>About this tracker</h2>
+        <p>Tribyu Tracker was a community-built dashboard, made between May and August 2025. It charted the prize pool, hashrate and payouts, and included a reward calculator. This site is an archive of that data.</p>
+    </section>
+
+    <section class="about-card">
+        <h2>Sources</h2>
+        <ul class="about-sources">
+            <li><a href="https://stacker.news/items/882760" target="_blank" rel="noopener noreferrer">Satlantis is now Tribyu (Stacker News)</a></li>
+            <li><a href="https://stacker.news/items/1243619" target="_blank" rel="noopener noreferrer">Tribyu closing announcement (Stacker News)</a></li>
+            <li><a href="https://stacker.news/items/246088" target="_blank" rel="noopener noreferrer">Satlantis Season 3 (Stacker News)</a></li>
+            <li><a href="https://chainplay.gg/blog/minecraft-players-earn-bitcoin-rewards-satlantis/" target="_blank" rel="noopener noreferrer">Satlantis reward pool and ad revenue (ChainPlay)</a></li>
+            <li><a href="https://decrypt.co/resources/how-earn-bitcoin-playing-minecraft-satlantis-guide" target="_blank" rel="noopener noreferrer">How to earn Bitcoin on Satlantis (Decrypt)</a></li>
+            <li><a href="https://medium.com/@jiuletto/thoughts-on-satlantis-part-6-is-joule-scarcity-good-32443a3a52b2" target="_blank" rel="noopener noreferrer">Is Joule scarcity good? (Medium)</a></li>
+            <li><a href="https://medium.com/@jiuletto/thoughts-on-tribyu-formerly-satlantis-part-7-why-proof-of-work-c51285d4aa19" target="_blank" rel="noopener noreferrer">Why Proof of Work? (Medium)</a></li>
+        </ul>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="footer-container">
+    </div>
+    <div class="footer-bottom">
+        <p>Tribyu Tracker &middot; archived project (2025)</p>
+    </div>
+</footer>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('menuContent').classList.toggle('show');
+    }
+
+    function toggleDarkMode() {
+        const isDarkMode = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        document.getElementById('themeToggle').checked = isDarkMode;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuContent = document.getElementById('menuContent');
+        menuContent.addEventListener('click', e => e.stopPropagation());
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.menu')) menuContent.classList.remove('show');
+        });
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeToggle').checked = true;
+        }
+    });
+</script>
+</body>
+</html>

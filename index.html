@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tribyu Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="script.js"></script>
+    <link rel="icon" type="image/png" href="img/TribyuLogo.png">
+</head>
+<body>
+<header class="header">
+  <a href="index.html" class="header-logo-link">
+    <img src="img/TribyuLogo.png" alt="Logo" class="header-logo">
+    <span class="header-title">Tribyu Tracker</span>
+  </a>
+  <div class="nav-container">
+    <nav class="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="detail.html">Detail Stats</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="about.html">About</a>
+    </nav>
+        <div class="menu" onclick="toggleMenu()">☰</div>
+  </div>
+</header>
+<div class="archive-banner">
+    <strong class="archive-banner-title">Tribyu was cancelled in 2025.</strong>
+    <span>This tracker is an archive of data from 10 Feb – 30 Sep 2025 and is no longer updated. <a href="about.html">What was Tribyu?</a></span>
+</div>
+    <div class="menu-content" id="menuContent">
+        <a href="#" data-scroll-target="#current-stats">Scroll to Top</a>
+        <a href="#" data-scroll-target="#prize-pool-graph">Prize Pool Graph</a>
+        <a href="#" data-scroll-target="#cumulative-rewards-graph">Overall Rewards Graph</a>
+        <a href="#" data-scroll-target="#hashrate-graph">Hashrate Graph</a>
+        <hr class="menu-divider">
+        <div class="theme-toggle">
+            <span class="icon sun" title="Light Mode">☀</span>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+            <span class="icon moon" title="Dark Mode">🌙</span>
+        </div>
+        <hr class="menu-divider">
+        <div class="fiat-toggle">
+            <span class="icon dollar" title="Show Fiat">💵</span>
+            <label class="switch">
+                <input type="checkbox" id="fiatToggle" onchange="toggleFiatConversion()">
+                <span class="slider"></span>
+            </label>
+            <span class="icon sats" title="Hide Fiat">⚡</span>
+        </div>
+        <hr class="menu-divider">
+        <div id="currencySelectContainer" style="display: none;">
+            <select id="currencySelect" onchange="changeCurrency()">
+                <option value="usd">USD ($)</option>
+                <option value="eur">EUR (€)</option>
+                <option value="gbp">GBP (£)</option>
+                <option value="jpy">JPY (¥)</option>
+                <option value="cny">CNY (¥)</option>
+                <option value="aud">AUD (A$)</option>
+                <option value="cad">CAD (C$)</option>
+                <option value="inr">INR (₹)</option>
+            </select>
+        </div>
+        <hr class="menu-divider">
+        <select id="timezoneSelect" onchange="changeTimezone()">
+            <option value="Etc/GMT+12">Baker Island (UTC-12)</option>
+            <option value="Pacific/Honolulu">Honolulu (UTC-10)</option>
+            <option value="America/Anchorage">Anchorage (UTC-9)</option>
+            <option value="America/Los_Angeles">Los Angeles (UTC-8)</option>
+            <option value="America/Denver">Denver (UTC-7)</option>
+            <option value="America/Chicago">Chicago (UTC-6)</option>
+            <option value="America/New_York">New York (UTC-5)</option>
+            <option value="America/Caracas">Caracas (UTC-4)</option>
+            <option value="America/Halifax">Halifax (UTC-3)</option>
+            <option value="America/Noronha">Fernando de Noronha (UTC-2)</option>
+            <option value="Atlantic/Azores">Azores (UTC-1)</option>
+            <option value="UTC">UTC</option>
+            <option value="Europe/London">London (UTC+0)</option>
+            <option value="Europe/Berlin">Berlin (UTC+1)</option>
+            <option value="Europe/Athens">Athens (UTC+2)</option>
+            <option value="Asia/Istanbul">Istanbul (UTC+3)</option>
+            <option value="Asia/Dubai">Dubai (UTC+4)</option>
+            <option value="Asia/Karachi">Karachi (UTC+5)</option>
+            <option value="Asia/Kolkata">Delhi (UTC+5:30)</option>
+            <option value="Asia/Dhaka">Dhaka (UTC+6)</option>
+            <option value="Asia/Bangkok">Bangkok (UTC+7)</option>
+            <option value="Asia/Shanghai">Shanghai (UTC+8)</option>
+            <option value="Asia/Tokyo">Tokyo (UTC+9)</option>
+            <option value="Australia/Sydney">Sydney (UTC+10)</option>
+            <option value="Pacific/Noumea">Nouméa (UTC+11)</option>
+            <option value="Pacific/Auckland">Auckland (UTC+12)</option>
+            <option value="Pacific/Apia">Apia (UTC+13)</option>
+            <option value="Pacific/Kiritimati">Kiritimati (UTC+14)</option>
+        </select>
+        <hr class="menu-divider">
+        <select id="timeFormatSelect" onchange="changeTimeFormat()">
+            <option value="24">24-Hour</option>
+            <option value="12">12-Hour</option>
+        </select>
+    </div>
+
+
+    <div class="values-container" id="current-stats">
+        <div class="value-box prize-box">
+            <span class="label">Current <br>Prize Pool</span>
+            <span class="value" id="prizePoolValue">Loading...</span>
+            <span class="usd-value" id="prizePoolFiat" style="display: none;"></span>
+        </div>
+        <div class="value-box total-sats-box">
+            <span class="label">Overall Rewards <br>Paid Out</span>
+            <span class="value" id="totalSatsValue">Loading...</span>
+            <span class="usd-value" id="totalSatsFiat" style="display: none;"></span>
+        </div>
+        <div class="value-box hashrate-box">
+            <span class="label">Current <br>Hashrate</span>
+            <span class="value" id="hashrateValue">Loading...</span>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="divider"></div>
+        <div class="graph-container" id="prize-pool-graph">
+            <div class="heading-container">
+                <h2>Overall Prize Pool</h2>
+            </div>
+            <div class="graph-filter">
+                <select id="ppRangeFilter">
+                    <option value="all">All</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+                <div class="custom-range" id="ppCustomRange">
+                    <input type="text" class="flatpickr-input" id="ppDateRange" placeholder="Select date range" readonly="readonly">
+                    <input type="hidden" id="ppStartDate">
+                    <input type="hidden" id="ppEndDate">
+                </div>
+            </div>
+            <div id="ppZoomIndicator" class="zoom-indicator"></div>
+            <div id="ppGraph"></div>
+        </div>
+        <div class="graph-container" id="cumulative-rewards-graph">
+            <div class="heading-container">
+                <h2>Overall Rewards Paid Out</h2>
+            </div>
+            <div class="graph-filter">
+                <select id="crRangeFilter">
+                    <option value="all">All</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+                <div class="custom-range" id="crCustomRange">
+                    <input type="text" class="flatpickr-input" id="crDateRange" placeholder="Select date range" readonly="readonly">
+                    <input type="hidden" id="crStartDate">
+                    <input type="hidden" id="crEndDate">
+                </div>
+            </div>
+            <div id="crZoomIndicator" class="zoom-indicator"></div>
+            <div id="crGraph"></div>
+        </div>
+        <div class="graph-container" id="hashrate-graph">
+            <div class="heading-container">
+                <h2>Overall Hashrate</h2>
+            </div>
+            <div class="graph-filter">
+                <select id="hrRangeFilter">
+                    <option value="all">All</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+                <div class="custom-range" id="hrCustomRange">
+                    <input type="text" class="flatpickr-input" id="hrDateRange" placeholder="Select date range" readonly="readonly">
+                    <input type="hidden" id="hrStartDate">
+                    <input type="hidden" id="hrEndDate">
+                </div>
+            </div>
+            <div id="hrZoomIndicator" class="zoom-indicator"></div>
+            <div id="hrGraph"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+        </div>
+        <div class="footer-bottom">
+            <p>Tribyu Tracker &middot; archived project (2025)</p>
+        </div>
+    </footer>
+
+<script>
+    let historyData = [];
+    let prizePool = "0";
+    let hashrate = "0";
+    let paymentsData = [];
+    let hourlyPPData = [];
+    let totalSats = "0";
+    let btcPrices = { usd: null, eur: null, gbp: null, jpy: null, cny: null, aud: null, cad: null, inr: null };
+    let btcPriceMap = {};
+    let btcPricesLoaded = false;
+    let isFiatConversionEnabled = true;
+    let selectedCurrency = localStorage.getItem('currency') || 'usd';
+    let hrFilteredData = [];
+    let crFilteredData = [];
+    let minDataDate = moment.tz('2025-02-11', 'UTC').startOf('day');
+    let maxDataDate = moment().tz('UTC').endOf('day');
+    let currentTimezone = localStorage.getItem('timezone') || 'UTC';
+    let timeFormat = localStorage.getItem('timeFormat') || '24';
+
+    document.getElementById('timezoneSelect').value = currentTimezone;
+    document.getElementById('timeFormatSelect').value = timeFormat;
+    document.getElementById('currencySelect').value = selectedCurrency;
+
+    function parseLocaleNumber(str) {
+        if (!str || typeof str !== 'string' || str === 'N/A' || str.trim() === '') return null;
+        return parseFloat(str.replace(/[^0-9.-]/g, '')) || null;
+    }
+
+    async function fetchBTCPrices() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp,jpy,cny,aud,cad,inr');
+            const data = await response.json();
+            btcPrices = {
+                usd: data.bitcoin.usd || null,
+                eur: data.bitcoin.eur || null,
+                gbp: data.bitcoin.gbp || null,
+                jpy: data.bitcoin.jpy || null,
+                cny: data.bitcoin.cny || null,
+                aud: data.bitcoin.aud || null,
+                cad: data.bitcoin.cad || null,
+                inr: data.bitcoin.inr || null
+            };
+            btcPricesLoaded = true;
+            if (isFiatConversionEnabled) updateFiatValues();
+        } catch (e) {
+            console.error('Error fetching BTC prices:', e);
+            btcPrices = { usd: null, eur: null, gbp: null, jpy: null, cny: null, aud: null, cad: null, inr: null };
+            btcPricesLoaded = true;
+            updateFiatValues();
+        }
+    }
+
+    async function fetchHistoricalBTCPrices(startDate, endDate) {
+        try {
+            // Ensure dates are not in the future
+            const now = new Date();
+            const adjustedStartDate = startDate > now ? now : startDate;
+            const adjustedEndDate = endDate > now ? now : endDate;
+
+            // Ensure start date is before end date
+            if (adjustedStartDate >= adjustedEndDate) {
+                console.warn('Invalid date range for historical BTC prices - start date must be before end date');
+                btcPriceMap = {};
+                return;
+            }
+
+            const startTimestamp = Math.floor(adjustedStartDate.getTime() / 1000);
+            const endTimestamp = Math.floor(adjustedEndDate.getTime() / 1000);
+
+            const response = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=${selectedCurrency}&from=${startTimestamp}&to=${endTimestamp}`);
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            const data = await response.json();
+            const prices = data.prices || [];
+            btcPriceMap = {};
+            prices.forEach(([timestamp, price]) => {
+                const date = moment(timestamp).tz('UTC').format('YYYY-MM-DD');
+                btcPriceMap[date] = price;
+            });
+        } catch (e) {
+            console.error('Error fetching historical BTC prices:', e);
+            btcPriceMap = {};
+        }
+    }
+
+    function getBTCPriceForDate(date) {
+        const dateKey = moment(date).tz('UTC').format('YYYY-MM-DD');
+        return btcPriceMap[dateKey] || btcPrices[selectedCurrency] || 0;
+    }
+
+    function satsToFiatNumeric(sats, date) {
+        if (sats == null || sats === 0) return 0;
+        const btcPrice = date ? getBTCPriceForDate(date) : btcPrices[selectedCurrency] || 0;
+        if (!btcPrice) return 0;
+        const btc = sats / 100000000;
+        return btc * btcPrice;
+    }
+
+    function satsToFiat(sats) {
+        if (sats == null) return '';
+        if (!btcPricesLoaded) return 'Loading...';
+        if (!btcPrices[selectedCurrency]) return '';
+        const btc = sats / 100000000;
+        const fiat = btc * btcPrices[selectedCurrency];
+        const currencySymbols = { usd: '$', eur: '€', gbp: '£', jpy: '¥', cny: '¥', aud: 'A$', cad: 'C$', inr: '₹' };
+        const currencySymbol = currencySymbols[selectedCurrency] || '$';
+        const formattedNumber = fiat.toLocaleString('en-US', {
+            style: 'decimal',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        return `(${currencySymbol}${formattedNumber})`;
+    }
+
+    function updateFiatValues() {
+        try {
+            const prizePoolElement = document.getElementById('prizePoolFiat');
+            const totalSatsElement = document.getElementById('totalSatsFiat');
+            const prizePoolSats = parseLocaleNumber(prizePool) || 0;
+            const totalSatsValue = parseLocaleNumber(totalSats) || 0;
+            prizePoolElement.textContent = isFiatConversionEnabled ? satsToFiat(prizePoolSats) : '';
+            totalSatsElement.textContent = isFiatConversionEnabled ? satsToFiat(totalSatsValue) : '';
+            prizePoolElement.style.display = isFiatConversionEnabled ? 'block' : 'none';
+            totalSatsElement.style.display = isFiatConversionEnabled ? 'block' : 'none';
+        } catch (e) {
+            console.error('Error updating fiat values:', e);
+            document.getElementById('prizePoolFiat').textContent = 'N/A';
+            document.getElementById('totalSatsFiat').textContent = 'N/A';
+        }
+    }
+
+    function toggleFiatConversion() {
+        try {
+            isFiatConversionEnabled = document.getElementById('fiatToggle').checked;
+            localStorage.setItem('fiatConversion', isFiatConversionEnabled);
+            document.getElementById('currencySelectContainer').style.display = isFiatConversionEnabled ? 'block' : 'none';
+            document.querySelectorAll('.value-box').forEach(box => {
+                box.classList.toggle('fiat-enabled', isFiatConversionEnabled);
+            });
+            updateFiatValues();
+            Plotly.purge('ppGraph');
+            Plotly.purge('hrGraph');
+            Plotly.purge('crGraph');
+            renderGraphs();
+        } catch (e) {
+            console.error('Error toggling fiat conversion:', e);
+        }
+    }
+
+    function loadFiatConversionPreference() {
+        try {
+            const fiatConversion = localStorage.getItem('fiatConversion');
+            isFiatConversionEnabled = fiatConversion === null ? true : fiatConversion === 'true';
+            document.getElementById('fiatToggle').checked = isFiatConversionEnabled;
+            document.getElementById('currencySelectContainer').style.display = isFiatConversionEnabled ? 'block' : 'none';
+            document.querySelectorAll('.value-box').forEach(box => {
+                box.classList.toggle('fiat-enabled', isFiatConversionEnabled);
+            });
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error loading fiat conversion preference:', e);
+            isFiatConversionEnabled = true;
+            document.getElementById('fiatToggle').checked = true;
+            document.getElementById('currencySelectContainer').style.display = 'block';
+            document.querySelectorAll('.value-box').forEach(box => box.classList.add('fiat-enabled'));
+            updateFiatValues();
+        }
+    }
+
+    function changeCurrency() {
+        try {
+            selectedCurrency = document.getElementById('currencySelect').value;
+            localStorage.setItem('currency', selectedCurrency);
+            fetchBTCPrices().then(() => {
+                btcPriceMap = {};
+                updateFiatValues();
+                Plotly.purge('ppGraph');
+                Plotly.purge('hrGraph');
+                Plotly.purge('crGraph');
+                renderGraphs();
+            });
+        } catch (e) {
+            console.error('Error changing currency:', e);
+        }
+    }
+
+    function changeTimezone() {
+        try {
+            currentTimezone = document.getElementById('timezoneSelect').value;
+            localStorage.setItem('timezone', currentTimezone);
+            minDataDate = moment.tz('2025-02-11', currentTimezone).startOf('day');
+            Plotly.purge('ppGraph');
+            Plotly.purge('hrGraph');
+            Plotly.purge('crGraph');
+            renderGraphs();
+        } catch (e) {
+            console.error('Error changing timezone:', e);
+        }
+    }
+
+    function changeTimeFormat() {
+        try {
+            timeFormat = document.getElementById('timeFormatSelect').value;
+            localStorage.setItem('timeFormat', timeFormat);
+            Plotly.purge('ppGraph');
+            Plotly.purge('hrGraph');
+            Plotly.purge('crGraph');
+            renderGraphs();
+        } catch (e) {
+            console.error('Error changing time format:', e);
+        }
+    }
+
+    function formatDate(date) {
+        try {
+            const momentDate = moment.tz(date, currentTimezone);
+            return momentDate.isValid() ? momentDate.format(timeFormat === '24' ? 'MMM D HH:mm' : 'MMM D h:mm A') : 'Invalid Date';
+        } catch (e) {
+            console.error('Error formatting date:', e);
+            return 'Unknown Date';
+        }
+    }
+
+    function getGraphDateRange(rangeFilterId, startDateId, endDateId, dataType) {
+        const rangeFilter = document.getElementById(rangeFilterId).value;
+        const now = maxDataDate.clone().tz(currentTimezone);
+        const minHashrateDate = moment.tz('2025-02-15', currentTimezone).startOf('day');
+        let startDate, endDate;
+        try {
+            if (rangeFilter === 'all') {
+                startDate = dataType === 'hashrate' ? minHashrateDate : minDataDate.clone();
+                endDate = maxDataDate.clone();
+            } else if (rangeFilter === 'custom') {
+                const startInput = document.getElementById(startDateId).value;
+                const endInput = document.getElementById(endDateId).value;
+                startDate = startInput ? moment.tz(startInput, currentTimezone).startOf('day') : (dataType === 'hashrate' ? minHashrateDate : minDataDate.clone());
+                endDate = endInput ? moment.tz(endInput, currentTimezone).endOf('day') : maxDataDate.clone();
+                if (startDate.isAfter(endDate)) [startDate, endDate] = [endDate, startDate];
+            } else {
+                const days = { '7d': 7, '30d': 30, '90d': 90 }[rangeFilter] || 30;
+                startDate = now.clone().subtract(days, 'days').startOf('day');
+                endDate = now.clone().endOf('day');
+            }
+            if (dataType === 'hashrate') {
+                startDate = startDate.isBefore(minHashrateDate) ? minHashrateDate : startDate;
+            } else {
+                startDate = startDate.isBefore(minDataDate) ? minDataDate.clone() : startDate;
+            }
+            // Ensure end date doesn't exceed current date
+            const currentDate = moment.tz(currentTimezone).endOf('day');
+            endDate = endDate.isAfter(currentDate) ? currentDate : endDate;
+            endDate = endDate.isAfter(maxDataDate) ? maxDataDate.clone() : endDate;
+            return { startDate: startDate.toDate(), endDate: endDate.toDate() };
+        } catch (e) {
+            console.error(`Error in getGraphDateRange for ${rangeFilterId}:`, e);
+            return { startDate: dataType === 'hashrate' ? minHashrateDate.toDate() : minDataDate.toDate(), endDate: maxDataDate.toDate() };
+        }
+    }
+
+    async function renderGraphs() {
+        try {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const ppRange = getGraphDateRange('ppRangeFilter', 'ppStartDate', 'ppEndDate', 'prizepool');
+            const hrRange = getGraphDateRange('hrRangeFilter', 'hrStartDate', 'hrEndDate', 'hashrate');
+            const crRange = getGraphDateRange('crRangeFilter', 'crStartDate', 'crEndDate', 'cumulative');
+
+            if (isFiatConversionEnabled) {
+                await fetchHistoricalBTCPrices(
+                    new Date(Math.min(ppRange.startDate, crRange.startDate)),
+                    new Date(Math.max(ppRange.endDate, crRange.endDate))
+                );
+            }
+
+            const fiatSeries = isFiatConversionEnabled && Object.keys(btcPriceMap).length > 0;
+
+            const validData = hourlyPPData.filter(entry => {
+                if (!entry || !entry.time || !entry.prizePool) return false;
+                const time = new Date(entry.time);
+                const prizePool = parseLocaleNumber(entry.prizePool);
+                return !isNaN(time.getTime()) && prizePool != null && prizePool > 0 && time >= minDataDate.toDate();
+            });
+
+            const ppFilteredData = validData.filter(entry => {
+                const time = new Date(entry.time);
+                const prizePool = parseLocaleNumber(entry.prizePool);
+                return !isNaN(time.getTime()) && prizePool != null && prizePool > 0 && time >= ppRange.startDate && time <= ppRange.endDate;
+            });
+
+            hrFilteredData = validData.filter(entry => {
+                const time = new Date(entry.time);
+                const hashrate = parseLocaleNumber(entry.hashrate);
+                return !isNaN(time.getTime()) && hashrate != null && hashrate > 0 && time >= new Date('2025-02-15T00:00:00Z') && time <= hrRange.endDate;
+            });
+
+            const validCRData = paymentsData.filter(entry => {
+                if (!entry || !entry.time || !entry.paymentAmount) return false;
+                const time = new Date(entry.time);
+                const paymentAmount = parseLocaleNumber(entry.paymentAmount);
+                return !isNaN(time.getTime()) && paymentAmount != null && paymentAmount > 0;
+            });
+
+            crFilteredData = validCRData.filter(entry => {
+                const time = new Date(entry.time);
+                return !isNaN(time.getTime()) && time >= crRange.startDate && time <= crRange.endDate;
+            });
+
+            if (validData.length === 0) {
+                document.getElementById('ppGraph').innerHTML = '<p>No data available</p>';
+                document.getElementById('hrGraph').innerHTML = '<p>No data available</p>';
+                document.getElementById('crGraph').innerHTML = '<p>No data available</p>';
+                return;
+            }
+
+            const ppDates = ppFilteredData.map(entry => moment.tz(entry.time, currentTimezone).toDate()).filter(date => date && !isNaN(date.getTime()));
+            const prizePoolValues = ppFilteredData.map(entry => parseLocaleNumber(entry.prizePool)).filter(v => v != null);
+            const hrDates = hrFilteredData.map(entry => moment.tz(entry.time, currentTimezone).toDate()).filter(date => date && !isNaN(date.getTime()));
+            const hashrateValues = hrFilteredData.map(entry => parseLocaleNumber(entry.hashrate)).filter(v => v != null);
+            const prizePoolFiatValues = ppFilteredData.map((entry, i) => fiatSeries ? satsToFiatNumeric(parseLocaleNumber(entry.prizePool), ppDates[i]) : 0);
+
+            const ppMin = prizePoolValues.length > 0 ? Math.min(...prizePoolValues) || 0 : 0;
+            const ppMax = prizePoolValues.length > 0 ? Math.max(...prizePoolValues) || 180 : 180;
+            const ppFiatMin = fiatSeries && prizePoolFiatValues.length > 0 ? Math.min(...prizePoolFiatValues.filter(v => v !== 0)) || 0 : 0;
+            const ppFiatMax = fiatSeries && prizePoolFiatValues.length > 0 ? Math.max(...prizePoolFiatValues.filter(v => v != null)) || 1 : 100;
+            const hrMin = hashrateValues.length > 0 ? Math.min(...hashrateValues) || 0 : 0;
+            const hrMax = hashrateValues.length > 0 ? Math.max(...hashrateValues) || 180 : 180;
+
+            const currencySymbols = { usd: '$', eur: '€', gbp: '£', jpy: '¥', cny: '¥', aud: 'A$', cad: 'C$', inr: '₹' };
+            const fiatTickPrefix = currencySymbols[selectedCurrency] || '$';
+
+            const graphLayout = {
+                xaxis: {
+                    title: { text: 'Date & Time', standoff: 20, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                    type: 'date',
+                    tickformat: timeFormat === '24' ? '%d %b %H:%M' : '%d %b %I:%M %p',
+                    tickmode: 'auto',
+                    nticks: 8,
+                    autorange: false,
+                    constrain: 'domain',
+                    fixedrange: false,
+                    tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                    gridcolor: isDarkMode ? '#444' : '#ddd',
+                    automargin: true
+                },
+                yaxis: {
+                    title: { text: '', standoff: 50, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                    tickformat: ',.0f',
+                    autorange: false,
+                    autoshift: true,
+                    tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                    gridcolor: isDarkMode ? '#444' : '#ddd',
+                    ticklen: 5,
+                    tickwidth: 1
+                },
+                margin: { t: 40, r: 100, b: 100, l: 160 },
+                plot_bgcolor: isDarkMode ? '#2a2a2a' : 'white',
+                paper_bgcolor: isDarkMode ? '#2a2a2a' : 'white',
+                showlegend: true,
+                legend: {
+                    x: 0.5,
+                    y: 1.15,
+                    xanchor: 'center',
+                    yanchor: 'bottom',
+                    orientation: 'h',
+                    font: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 }
+                },
+                hovermode: 'x unified',
+                hoverlabel: { bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)', font: { color: isDarkMode ? '#000000' : '#ffffff', size: 10 } },
+                dragmode: 'zoom',
+                width: null,
+                height: null
+            };
+
+            const getRightMargin = (currency) => {
+                const baseMargin = 100;
+                const longCurrencies = ['jpy', 'inr', 'cny'];
+                return longCurrencies.includes(currency.toLowerCase()) ? 120 : baseMargin;
+            };
+
+            let ppTrace = null;
+            let ppFiatTrace = null;
+            let hrTrace = null;
+            let crTrace = null;
+            let crFiatTrace = null;
+
+            // Prize Pool Graph
+            if (ppDates.length > 0 && prizePoolValues.length > 0 && !prizePoolValues.every(v => v == null)) {
+                const ppGraphLayout = {
+                    ...graphLayout,
+                    xaxis: { ...graphLayout.xaxis, range: [ppRange.startDate, ppRange.endDate] },
+                    yaxis: {
+                        title: { text: 'Satoshi', standoff: 20, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                        tickformat: ',.0f',
+                        range: [ppMin - (ppMax - ppMin) * 0.1, ppMax + (ppMax - ppMin) * 0.1],
+                        tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                        gridcolor: isDarkMode ? '#444' : '#ddd',
+                        ticklen: 5,
+                        tickwidth: 1
+                    },
+                    yaxis2: {
+                        title: { text: fiatSeries ? selectedCurrency.toUpperCase() : '', standoff: 20, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                        tickprefix: fiatSeries ? fiatTickPrefix : '',
+                        tickformat: ',.2f',
+                        range: fiatSeries ? [ppFiatMin - (ppFiatMax - ppFiatMin) * 0.1, ppFiatMax + (ppFiatMax - ppFiatMin) * 0.1] : [0, 1],
+                        overlaying: 'y',
+                        side: 'right',
+                        tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                        showticklabels: fiatSeries,
+                        ticklen: 5,
+                        tickwidth: 1
+                    },
+                    margin: { t: 40, r: getRightMargin(selectedCurrency), b: 100, l: 160 }
+                };
+
+                ppTrace = {
+                    x: ppDates,
+                    y: prizePoolValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Satoshi',
+                    line: { color: '#FF9800', width: 2, shape: 'spline' },
+                    hovertemplate: 'Sats: %{y:,.0f}<extra></extra>',
+                    yaxis: 'y'
+                };
+
+                ppFiatTrace = {
+                    x: ppDates,
+                    y: prizePoolFiatValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: fiatSeries ? selectedCurrency.toUpperCase() : '',
+                    line: { color: '#4CAF50', width: 2, shape: 'spline' },
+                    hovertemplate: fiatSeries ? `${selectedCurrency.toUpperCase()}: ${fiatTickPrefix}%{y:,.2f}<extra></extra>` : '',
+                    yaxis: 'y2',
+                    visible: fiatSeries
+                };
+
+                Plotly.newPlot('ppGraph', [ppTrace, ppFiatTrace], ppGraphLayout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                    displaylogo: false,
+                    scrollZoom: true,
+                    autosize: true
+                });
+            } else {
+                document.getElementById('ppGraph').innerHTML = '<p>No valid data for selected range</p>';
+            }
+
+            // Hashrate Graph
+            let hrXRangeStart = hrRange.startDate;
+            if (hrDates.length > 0) {
+                const earliestHrDate = new Date(Math.min(...hrDates.map(d => d.getTime())));
+                hrXRangeStart = earliestHrDate >= hrRange.startDate ? earliestHrDate : hrRange.startDate;
+            }
+            if (hrDates.length > 0 && hashrateValues.length > 0 && !hashrateValues.every(v => v == null)) {
+                hrTrace = {
+                    x: hrDates,
+                    y: hashrateValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Hashrate',
+                    line: { color: '#2196F3', width: 2, shape: 'spline' },
+                    hovertemplate: 'Hashrate: %{y:,.0f}<extra></extra>'
+                };
+
+                Plotly.newPlot('hrGraph', [hrTrace], {
+                    ...graphLayout,
+                    xaxis: { ...graphLayout.xaxis, range: [hrXRangeStart, hrRange.endDate] },
+                    yaxis: {
+                        title: { text: 'Hashrate', standoff: 38, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                        range: [hrMin - (hrMax - hrMin) * 0.1, hrMax + (hrMax - hrMin) * 0.1],
+                        tickformat: ',.0f',
+                        tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                        gridcolor: isDarkMode ? '#444' : '#ddd',
+                        ticklen: 5,
+                        tickwidth: 1
+                    },
+                    margin: { t: 40, r: 100, b: 100, l: 160 }
+                }, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                    displaylogo: false,
+                    scrollZoom: true,
+                    autosize: true
+                });
+            } else {
+                document.getElementById('hrGraph').innerHTML = '<p>No valid data for selected range</p>';
+            }
+
+            // Cumulative Rewards Graph
+            let crDates = [];
+            let crCumulativeValues = [];
+            let crCumulativeFiatValues = [];
+
+            if (validCRData.length > 0) {
+                const sortedData = validCRData.sort((a, b) => new Date(a.time) - new Date(b.time));
+                let runningTotal = 0;
+
+                // Calculate the starting total for payments before the selected range
+                const paymentsBefore = sortedData.filter(entry => new Date(entry.time) < crRange.startDate);
+                paymentsBefore.forEach(entry => {
+                    const value = parseLocaleNumber(entry.paymentAmount);
+                    if (value != null && value > 0) runningTotal += value;
+                });
+
+                // Include the starting point at crRange.startDate
+                if (runningTotal > 0 || sortedData.some(entry => new Date(entry.time) >= crRange.startDate)) {
+                    crDates.push(new Date(crRange.startDate));
+                    crCumulativeValues.push(runningTotal);
+                    crCumulativeFiatValues.push(fiatSeries ? satsToFiatNumeric(runningTotal, crRange.startDate) : 0);
+                }
+
+                // Add data points for payments in the range
+                const paymentsInRange = sortedData.filter(entry => {
+                    const time = new Date(entry.time);
+                    return !isNaN(time.getTime()) && time >= crRange.startDate && time <= crRange.endDate;
+                });
+
+                paymentsInRange.forEach(entry => {
+                    const value = parseLocaleNumber(entry.paymentAmount);
+                    if (value != null && value > 0) {
+                        runningTotal += value;
+                        const date = moment.tz(entry.time, currentTimezone).toDate();
+                        if (!isNaN(date.getTime())) {
+                            crDates.push(date);
+                            crCumulativeValues.push(runningTotal);
+                            crCumulativeFiatValues.push(fiatSeries ? satsToFiatNumeric(runningTotal, date) : 0);
+                        }
+                    }
+                });
+
+                // If no payments in range but there are prior payments, add an endpoint
+                if (paymentsInRange.length === 0 && runningTotal > 0) {
+                    crDates.push(new Date(crRange.endDate));
+                    crCumulativeValues.push(runningTotal);
+                    crCumulativeFiatValues.push(fiatSeries ? satsToFiatNumeric(runningTotal, crRange.endDate) : 0);
+                }
+            }
+
+            if (crDates.length > 0 && crCumulativeValues.length > 0) {
+                const crMin = Math.min(...crCumulativeValues) || 0;
+                const crMax = Math.max(...crCumulativeValues) || 0;
+                const crFiatMin = fiatSeries && crCumulativeFiatValues.length > 0 ? Math.min(...crCumulativeFiatValues.filter(v => v != null)) || 0 : 0;
+                const crFiatMax = fiatSeries && crCumulativeFiatValues.length > 0 ? Math.max(...crCumulativeFiatValues.filter(v => v != null)) || 1 : 100;
+
+                crTrace = {
+                    x: crDates,
+                    y: crCumulativeValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Satoshi',
+                    line: { color: '#a028ee', width: 2, shape: 'spline' },
+                    hovertemplate: 'Sats: %{y:,.0f}<extra></extra>',
+                    yaxis: 'y'
+                };
+
+                crFiatTrace = {
+                    x: crDates,
+                    y: crCumulativeFiatValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: fiatSeries ? selectedCurrency.toUpperCase() : '',
+                    line: { color: '#4CAF50', width: 2, shape: 'spline' },
+                    hovertemplate: fiatSeries ? `${selectedCurrency.toUpperCase()}: ${fiatTickPrefix}%{y:,.2f}<extra></extra>` : '',
+                    yaxis: 'y2',
+                    visible: fiatSeries
+                };
+
+                const crGraphLayout = {
+                    ...graphLayout,
+                    xaxis: { ...graphLayout.xaxis, range: [crRange.startDate, crRange.endDate] },
+                    yaxis: {
+                        title: { text: 'Satoshi', standoff: 20, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                        tickformat: ',.0f',
+                        range: [crMin - (crMax - crMin) * 0.1 || 0, crMax + (crMax - crMin) * 0.1 || 1000000],
+                        tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                        gridcolor: isDarkMode ? '#444' : '#ddd',
+                        ticklen: 5,
+                        tickwidth: 1
+                    },
+                    yaxis2: {
+                        title: { text: fiatSeries ? selectedCurrency.toUpperCase() : '', standoff: 20, font: { color: isDarkMode ? '#ffffff' : '#000000', size: 12 } },
+                        tickprefix: fiatSeries ? fiatTickPrefix : '',
+                        tickformat: ',.2f',
+                        range: fiatSeries ? [crFiatMin - (crFiatMax - crFiatMin) * 0.1 || 0, crFiatMax + (crFiatMax - crFiatMin) * 0.1 || 100] : [0, 1],
+                        overlaying: 'y',
+                        side: 'right',
+                        tickfont: { color: isDarkMode ? '#ffffff' : '#000000', size: 10 },
+                        showticklabels: fiatSeries,
+                        ticklen: 5,
+                        tickwidth: 1
+                    },
+                    margin: { t: 40, r: getRightMargin(selectedCurrency), b: 100, l: 160 }
+                };
+
+                Plotly.newPlot('crGraph', [crTrace, crFiatTrace], crGraphLayout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                    displaylogo: false,
+                    scrollZoom: true,
+                    autosize: true
+                });
+            } else {
+                document.getElementById('crGraph').innerHTML = '<p>No valid data for selected range</p>';
+            }
+
+            function updateGraph(graphId, indicatorId, minDate, maxDate, values, fiatValues, trace, fiatTrace) {
+                if (!trace) return;
+                const graph = document.getElementById(graphId);
+                const indicator = document.getElementById(indicatorId);
+                const fullRangeDiff = new Date(maxDate) - new Date(minDate);
+                const dates = graphId === 'ppGraph' ? ppDates : graphId === 'hrGraph' ? hrDates : crDates;
+                const isHashrate = graphId === 'hrGraph';
+                const minHashrateDate = new Date('2025-02-15T00:00:00Z');
+
+                graph.on('plotly_relayout', (eventData) => {
+                    try {
+                        if (eventData['xaxis.range[0]'] || eventData['xaxis.range[1]']) {
+                            let newMinX = eventData['xaxis.range[0]'] ? new Date(eventData['xaxis.range[0]']) : new Date(minDate);
+                            let newMaxX = eventData['xaxis.range[1]'] ? new Date(eventData['xaxis.range[1]']) : new Date(maxDate);
+                            const minLimit = isHashrate ? (newMinX < minHashrateDate ? minHashrateDate : minDate) : new Date(minDate);
+                            const maxLimit = new Date(maxDate);
+
+                            let update = false;
+                            if (newMinX < minLimit) {
+                                const diff = newMaxX - newMinX;
+                                newMinX = minLimit;
+                                newMaxX = new Date(newMinX.getTime() + diff);
+                                update = true;
+                            }
+                            if (newMaxX > maxLimit) {
+                                const diff = newMaxX - newMinX;
+                                newMaxX = maxLimit;
+                                newMinX = new Date(newMaxX.getTime() - diff);
+                                update = true;
+                            }
+                            if (newMinX < minLimit) {
+                                newMinX = minLimit;
+                                update = true;
+                            }
+
+                            const rangeDiff = newMaxX - newMinX;
+                            const isZoomed = rangeDiff < fullRangeDiff * 0.95;
+                            if (isZoomed) {
+                                indicator.classList.add('visible');
+                                indicator.textContent = `Showing: ${formatDate(newMinX)} - ${formatDate(newMaxX)}`;
+                            } else {
+                                indicator.classList.remove('visible');
+                            }
+
+                            const visibleData = dates.map((date, i) => ({
+                                date: new Date(date),
+                                value: values[i],
+                                fiatValue: fiatValues ? fiatValues[i] : null
+                            })).filter(d => d.date >= newMinX && d.date <= newMaxX);
+
+                            if (visibleData.length > 0) {
+                                const visibleValues = visibleData.map(d => d.value).filter(v => v != null);
+                                const yMin = Math.min(...visibleValues);
+                                const yMax = Math.max(...visibleValues);
+                                const padding = (yMax - yMin);
+
+                                const updateLayout = {
+                                    'yaxis.range': [yMin - padding, yMax + padding],
+                                    'yaxis.title': {
+                                        text: graphId === 'ppGraph' ? 'Satoshi' : graphId === 'hrGraph' ? 'Hashrate' : 'Satoshi',
+                                        standoff: graphId === 'ppGraph' ? 20 : graphId === 'hrGraph' ? 38 : 20,
+                                        font: { color: isDarkMode ? '#ffffff' : '#000000'},
+                                    },
+                                    'yaxis.ticklen': 5,
+                                    'yaxis.tickwidth': 1
+                                };
+
+                                if (fiatValues && fiatSeries && (graphId === 'ppGraph' || graphId === 'crGraph')) {
+                                    const visibleFiatValues = visibleData.map(d => d.fiatValue).filter(v => v != null);
+                                    if (visibleFiatValues.length > 0) {
+                                        const fiatMin = Math.min(...visibleFiatValues);
+                                        const fiatMax = Math.max(...visibleFiatValues);
+                                        const fiatPadding = (fiatMax - fiatMin) * 0.1 || 1;
+                                        updateLayout['yaxis2.range'] = [fiatMin - fiatPadding, fiatMax + fiatPadding];
+                                        updateLayout['yaxis2.title'] = {
+                                            text: fiatSeries ? selectedCurrency.toUpperCase() : '',
+                                            standoff: 20,
+                                            font: { color: isDarkMode ? '#ffffff' : '#000000'},
+                                        };
+                                        updateLayout['yaxis2.showticklabels'] = fiatSeries;
+                                        updateLayout['yaxis2.tickprefix'] = fiatSeries ? fiatTickPrefix : '';
+                                        updateLayout['yaxis2.tickformat'] = ',.2f';
+                                        updateLayout['yaxis2.ticklen'] = 5;
+                                        updateLayout['yaxis2.tickwidth'] = 1;
+                                        updateLayout['margin.r'] = getRightMargin(selectedCurrency);
+                                    }
+                                }
+
+                                Plotly.relayout(graphId, updateLayout);
+                            }
+
+                            if (update) {
+                                Plotly.relayout(graphId, { 'xaxis.range': [newMinX, newMaxX] });
+                            }
+                        }
+                    } catch (err) {
+                        console.error(`Error in plotly_relayout for ${graphId}:`, err);
+                    }
+                });
+            }
+
+            if (ppTrace && ppDates.length > 0 && prizePoolValues.length > 0) {
+                updateGraph('ppGraph', 'ppZoomIndicator', ppRange.startDate, ppRange.endDate, prizePoolValues, prizePoolFiatValues, ppTrace, ppFiatTrace);
+                const ppIndicator = document.getElementById('ppZoomIndicator');
+                ppIndicator.classList.add('visible');
+                ppIndicator.textContent = `Showing: ${formatDate(ppRange.startDate)} - ${formatDate(ppRange.endDate)}`;
+            }
+
+            if (hrTrace && hrDates.length > 0 && hashrateValues.length > 0) {
+                updateGraph('hrGraph', 'hrZoomIndicator', hrXRangeStart, hrRange.endDate, hashrateValues, null, hrTrace, null);
+                const hrIndicator = document.getElementById('hrZoomIndicator');
+                hrIndicator.classList.add('visible');
+                hrIndicator.textContent = `Showing: ${formatDate(hrXRangeStart)} - ${formatDate(hrRange.endDate)}`;
+            }
+
+            if (crTrace && crFiatTrace && crDates.length > 0 && crCumulativeValues.length > 0) {
+                updateGraph('crGraph', 'crZoomIndicator', crRange.startDate, crRange.endDate, crCumulativeValues, crCumulativeFiatValues, crTrace, crFiatTrace);
+                const crIndicator = document.getElementById('crZoomIndicator');
+                crIndicator.classList.add('visible');
+                crIndicator.textContent = `Showing: ${formatDate(crRange.startDate)} - ${formatDate(crRange.endDate)}`;
+            }
+        } catch (e) {
+            console.error('Error rendering graphs:', e);
+            document.getElementById('ppGraph').innerHTML = '<p>Error rendering Prize Pool Graph</p>';
+            document.getElementById('hrGraph').innerHTML = '<p>Error rendering Hashrate Graph</p>';
+            document.getElementById('crGraph').innerHTML = '<p>Error rendering Cumulative Rewards Graph</p>';
+        }
+    }
+
+    function calculateTotalSats() {
+        try {
+            document.getElementById('totalSatsValue').textContent = totalSats;
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error calculating total sats:', e);
+            document.getElementById('totalSatsValue').textContent = 'Error';
+            document.getElementById('totalSatsFiat').textContent = 'N/A';
+        }
+    }
+
+    async function initializeData() {
+        try {
+            const data = await window.processData();
+            prizePool = data.prizePool || '0';
+            hashrate = data.hashrate || '0';
+            totalSats = data.totalSatsPaid || '0';
+            historyData = JSON.parse(data.historyData || '[]');
+            paymentsData = JSON.parse(data.paymentsData || '[]');
+            hourlyPPData = JSON.parse(data.hourlyPPData || '[]');
+            document.getElementById('prizePoolValue').textContent = prizePool;
+            document.getElementById('hashrateValue').textContent = hashrate;
+            calculateTotalSats();
+            historyData.sort((a, b) => new Date(b.time) - new Date(a.time));
+            const allDates = [
+                ...historyData.map(entry => entry?.time ? new Date(entry.time) : null),
+                ...paymentsData.map(entry => entry?.time ? new Date(entry.time) : null),
+                ...hourlyPPData.map(entry => entry?.time && parseLocaleNumber(entry.prizePool) ? new Date(entry.time) : null)
+            ].filter(d => d != null && !isNaN(d.getTime()));
+            maxDataDate = allDates.length > 0 ? moment.tz(Math.max(...allDates), currentTimezone).endOf('day') : moment().tz(currentTimezone).endOf('day');
+            if (minDataDate.isAfter(maxDataDate)) {
+                minDataDate = moment.tz('2025-02-11', currentTimezone).startOf('day');
+            }
+            await fetchBTCPrices();
+            loadFiatConversionPreference();
+            renderGraphs();
+        } catch (e) {
+            console.error('Error initializing data:', e);
+            document.getElementById('prizePoolValue').textContent = 'Error';
+            document.getElementById('hashrateValue').textContent = 'Error';
+            document.getElementById('totalSatsValue').textContent = 'Error';
+            document.getElementById('prizePoolFiat').textContent = 'N/A';
+            document.getElementById('totalSatsFiat').textContent = 'N/A';
+            document.getElementById('ppGraph').innerHTML = '<p>Error rendering graphs</p>';
+            document.getElementById('hrGraph').innerHTML = '<p>Error rendering graphs</p>';
+            document.getElementById('crGraph').innerHTML = '<p>Error rendering graphs</p>';
+        }
+    }
+
+
+    function toggleMenu() {
+        try {
+            const menuContent = document.getElementById('menuContent');
+            if (menuContent) {
+                menuContent.classList.toggle('show');
+            }
+        } catch (e) {
+            console.error('Error toggling menu:', e);
+        }
+    }
+
+    function closeMenuOnOutsideClick(event) {
+        try {
+            const menuContent = document.getElementById('menuContent');
+            const menuToggle = document.querySelector('.menu');
+            if (menuContent && menuContent.classList.contains('show') && !menuContent.contains(event.target) && !menuToggle.contains(event.target)) {
+                menuContent.classList.remove('show');
+            }
+        } catch (e) {
+            console.error('Error closing menu on outside click:', e);
+        }
+    }
+
+    function scrollToSection(selector) {
+        try {
+            const element = document.querySelector(selector);
+            if (element) {
+                window.scrollTo({
+                    top: element.offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        } catch (e) {
+            console.error(`Error scrolling to ${selector}:`, e);
+        }
+    }
+
+function toggleDarkMode() {
+    try {
+        // Get all graph containers
+        const graphContainers = document.querySelectorAll('.graph-container');
+
+        // Add fading class to start fade-out
+        graphContainers.forEach(container => container.classList.add('fading'));
+
+        // Toggle dark mode class on body
+        const isDarkMode = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        document.getElementById('themeToggle').checked = isDarkMode;
+
+        // Wait for fade-out transition (0.3s) before updating graphs
+        setTimeout(() => {
+            // Purge and redraw graphs
+            Plotly.purge('ppGraph');
+            Plotly.purge('hrGraph');
+            Plotly.purge('crGraph');
+            renderGraphs();
+
+            // Remove fading class to fade back in
+            // Use requestAnimationFrame to ensure redraw is complete
+            requestAnimationFrame(() => {
+                graphContainers.forEach(container => container.classList.remove('fading'));
+            });
+        }, 300); // Match CSS transition duration
+    } catch (e) {
+        console.error('Error toggling dark mode:', e);
+        // Ensure graphs are visible in case of error
+        document.querySelectorAll('.graph-container').forEach(container => container.classList.remove('fading'));
+    }
+}
+
+
+    function loadDarkMode() {
+        try {
+            const themeToggle = document.getElementById('themeToggle');
+            if (!themeToggle) throw new Error('themeToggle not found');
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'true') {
+                document.body.classList.add('dark-mode');
+                themeToggle.checked = true;
+            }
+        } catch (e) {
+            console.error('Error loading dark mode:', e);
+            document.body.classList.remove('dark-mode');
+            document.getElementById('themeToggle').checked = false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const ppFlatpickr = flatpickr('#ppDateRange', {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                minDate: minDataDate.format('YYYY-MM-DD'),
+                maxDate: maxDataDate.format('YYYY-MM-DD'),
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        document.getElementById('ppStartDate').value = moment(selectedDates[0]).format('YYYY-MM-DD');
+                        document.getElementById('ppEndDate').value = moment(selectedDates[1]).format('YYYY-MM-DD');
+                        Plotly.purge('ppGraph');
+                        renderGraphs();
+                    }
+                }
+            });
+
+            const hrFlatpickr = flatpickr('#hrDateRange', {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                minDate: '2025-02-15',
+                maxDate: maxDataDate.format('YYYY-MM-DD'),
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        document.getElementById('hrStartDate').value = moment(selectedDates[0]).format('YYYY-MM-DD');
+                        document.getElementById('hrEndDate').value = moment(selectedDates[1]).format('YYYY-MM-DD');
+                        Plotly.purge('hrGraph');
+                        renderGraphs();
+                    }
+                }
+            });
+
+            const crFlatpickr = flatpickr('#crDateRange', {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                minDate: minDataDate.format('YYYY-MM-DD'),
+                maxDate: maxDataDate.format('YYYY-MM-DD'),
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        document.getElementById('crStartDate').value = moment(selectedDates[0]).format('YYYY-MM-DD');
+                        document.getElementById('crEndDate').value = moment(selectedDates[1]).format('YYYY-MM-DD');
+                        Plotly.purge('crGraph');
+                        renderGraphs();
+                    }
+                }
+            });
+
+            document.getElementById('ppRangeFilter').addEventListener('change', (event) => {
+                document.getElementById('ppCustomRange').classList.toggle('show', event.target.value === 'custom');
+                if (event.target.value === 'custom') {
+                    ppFlatpickr.open();
+                }
+                Plotly.purge('ppGraph');
+                renderGraphs();
+            });
+
+            document.getElementById('hrRangeFilter').addEventListener('change', (event) => {
+                document.getElementById('hrCustomRange').classList.toggle('show', event.target.value === 'custom');
+                if (event.target.value === 'custom') {
+                    hrFlatpickr.open();
+                }
+                Plotly.purge('hrGraph');
+                renderGraphs();
+            });
+
+            document.getElementById('crRangeFilter').addEventListener('change', (event) => {
+                document.getElementById('crCustomRange').classList.toggle('show', event.target.value === 'custom');
+                if (event.target.value === 'custom') {
+                    crFlatpickr.open();
+                }
+                Plotly.purge('crGraph');
+                renderGraphs();
+            });
+
+            document.querySelectorAll('.menu-content a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = link.getAttribute('data-scroll-target');
+                    if (target) {
+                        scrollToSection(target);
+                        document.getElementById('menuContent').classList.remove('show');
+                    }
+                });
+            });
+
+            document.getElementById('menuContent').addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            document.getElementById('themeToggle').addEventListener('change', toggleDarkMode);
+
+            document.addEventListener('click', closeMenuOnOutsideClick);
+
+            loadDarkMode();
+            loadFiatConversionPreference();
+            initializeData();
+        } catch (e) {
+            console.error('Error in DOMContentLoaded:', e);
+        }
+    });
+</script>
+</body>
+</html>

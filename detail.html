@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Stats</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="img/TribyuLogo.png">
+</head>
+<body>
+<header class="header">
+  <a href="index.html" class="header-logo-link">
+    <img src="img/TribyuLogo.png" alt="Logo" class="header-logo">
+    <span class="header-title">Tribyu Tracker</span>
+  </a>
+  <div class="nav-container">
+    <nav class="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="detail.html">Detail Stats</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="about.html">About</a>
+    </nav>
+        <div class="menu" onclick="toggleMenu()">☰</div>
+  </div>
+</header>
+<div class="archive-banner">
+    <strong class="archive-banner-title">Tribyu was cancelled in 2025.</strong>
+    <span>This tracker is an archive of data from 10 Feb – 30 Sep 2025 and is no longer updated. Fiat values use today's BTC price. <a href="about.html">What was Tribyu?</a></span>
+</div>
+    <div class="menu-content" id="menuContent">
+        <a href="#" data-scroll-target="#current-stats">Scroll to Top</a>
+        <a href="#" data-scroll-target="#historical-table">Historical Table</a>
+        <hr class="menu-divider">
+        <div class="theme-toggle">
+            <span class="icon sun" title="Light Mode">☀</span>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle" onchange="toggleDarkMode()">
+                <span class="slider"></span>
+            </label>
+            <span class="icon moon" title="Dark Mode">🌙</span>
+        </div>
+        <hr class="menu-divider">
+        <div class="fiat-toggle">
+            <span class="icon dollar" title="Show Fiat">💵</span>
+            <label class="switch">
+                <input type="checkbox" id="fiatToggle" onchange="toggleFiatConversion()">
+                <span class="slider"></span>
+            </label>
+            <span class="icon sats" title="Hide Fiat">⚡</span>
+        </div>
+        <hr class="menu-divider">
+        <div id="currencySelectContainer" style="display: none;">
+            <select id="currencySelect" onchange="changeCurrency()">
+                <option value="usd">USD ($)</option>
+                <option value="eur">EUR (€)</option>
+                <option value="gbp">GBP (£)</option>
+                <option value="jpy">JPY (¥)</option>
+                <option value="cny">CNY (¥)</option>
+                <option value="aud">AUD (A$)</option>
+                <option value="cad">CAD (C$)</option>
+                <option value="inr">INR (₹)</option>
+            </select>
+        </div>
+        <hr class="menu-divider">
+        <select id="timezoneSelect" onchange="changeTimezone()">
+            <option value="Etc/GMT+12">Baker Island (UTC-12)</option>
+            <option value="Pacific/Honolulu">Honolulu (UTC-10)</option>
+            <option value="America/Anchorage">Anchorage (UTC-9)</option>
+            <option value="America/Los_Angeles">Los Angeles (UTC-8)</option>
+            <option value="America/Denver">Denver (UTC-7)</option>
+            <option value="America/Chicago">Chicago (UTC-6)</option>
+            <option value="America/New_York">New York (UTC-5)</option>
+            <option value="America/Caracas">Caracas (UTC-4)</option>
+            <option value="America/Halifax">Halifax (UTC-3)</option>
+            <option value="America/Noronha">Fernando de Noronha (UTC-2)</option>
+            <option value="Atlantic/Azores">Azores (UTC-1)</option>
+            <option value="UTC">UTC</option>
+            <option value="Europe/London">London (UTC+0)</option>
+            <option value="Europe/Berlin">Berlin (UTC+1)</option>
+            <option value="Europe/Athens">Athens (UTC+2)</option>
+            <option value="Asia/Istanbul">Istanbul (UTC+3)</option>
+            <option value="Asia/Dubai">Dubai (UTC+4)</option>
+            <option value="Asia/Karachi">Karachi (UTC+5)</option>
+            <option value="Asia/Kolkata">Delhi (UTC+5:30)</option>
+            <option value="Asia/Dhaka">Dhaka (UTC+6)</option>
+            <option value="Asia/Bangkok">Bangkok (UTC+7)</option>
+            <option value="Asia/Shanghai">Shanghai (UTC+8)</option>
+            <option value="Asia/Tokyo">Tokyo (UTC+9)</option>
+            <option value="Australia/Sydney">Sydney (UTC+10)</option>
+            <option value="Pacific/Noumea">Nouméa (UTC+11)</option>
+            <option value="Pacific/Auckland">Auckland (UTC+12)</option>
+            <option value="Pacific/Apia">Apia (UTC+13)</option>
+            <option value="Pacific/Kiritimati">Kiritimati (UTC+14)</option>
+        </select>
+        <hr class="menu-divider">
+        <select id="timeFormatSelect" onchange="changeTimeFormat()">
+            <option value="24">24-Hour</option>
+            <option value="12">12-Hour</option>
+        </select>
+    </div>
+
+    <div class="values-container" id="current-stats">
+        <div class="value-box last-24h-sats-box">
+            <span class="label">Sats Paid Out <br>in Last 24h</span>
+            <span class="value" id="satsLast24h">Loading...</span>
+            <span class="usd-value" id="satsLast24hFiat" style="display: none;"></span>
+        </div>
+        <div class="value-box payment-box">
+            <span class="label">Last <br>Reward</span>
+            <span class="value" id="lastPaymentAmount">Loading...</span>
+            <span class="usd-value" id="lastPaymentFiat" style="display: none;"></span>
+            <div class="payment-time" id="lastPaymentTime">Loading...</div>
+        </div>
+        <div class="value-box next-payment-box">
+            <span class="label">Next <br>Reward</span>
+            <span class="value" id="nextPaymentValue">Loading...</span>
+            <span class="usd-value" id="nextPaymentFiat" style="display: none;"></span>
+            <div class="payment-time" id="countdown">Loading...</div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="table-container" id="historical-table">
+    <div class="heading-container">
+        <h2>Historical Prize Pool and Hashrate</h2>
+        <div class="table-filter">
+            <select id="dataFilter">
+                <option value="all">All Data</option>
+                <option value="payments">Only Rewards</option>
+                <option value="hourly">Hourly PP & HR</option>
+            </select>
+            <input type="text" class="flatpickr-input" id="dateFilter" placeholder="Select date" readonly="readonly">
+        </div>
+    </div>
+    <div class="table-content">
+        <table id="historyTableWrapper">
+            <thead id="tableHeader"></thead>
+            <tbody id="historyTable"></tbody>
+        </table>
+        <div class="table-stats-container">
+            <div class="value-box selected-day-sats-box">
+                <span class="label">Total Rewards Paid Out <br> <span class="date" id="satsDate"></span></span>
+                <span class="value" id="selectedDaySats">0</span>
+                <span class="usd-value" id="selectedDaySatsFiat" style="display: none;"></span>
+            </div>
+            <div class="value-box highest-hashrate-box">
+                <span class="label">Highest Hashrate <br> <span class="date" id="highestHashrateDate"></span></span>
+                <span class="value" id="highestHashrate">0</span>
+            </div>
+            <div class="value-box lowest-hashrate-box">
+                <span class="label">Lowest <br> Hashrate <br> <span class="date" id="lowestHashrateDate"></span></span>
+                <span class="value" id="lowestHashrate">0</span>
+            </div>
+            <div class="value-box average-hashrate-box">
+                <span class="label">Average Hashrate <br> <span class="date" id="averageHashrateDate"></span></span>
+                <span class="value" id="averageHashrate">0</span>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+        </div>
+        <div class="footer-bottom">
+            <p>Tribyu Tracker &middot; archived project (2025)</p>
+        </div>
+    </footer>
+
+<script>
+
+    // Initialize variables
+    let btcPrices = { usd: 0, eur: 0, gbp: 0, jpy: 0, cny: 0, aud: 0, cad: 0, inr: 0 };
+    let isFiatConversionEnabled = true; // Changed to true to enable Fiat by default
+    let selectedCurrency = localStorage.getItem('currency') || 'usd';
+    let btcPricesLoaded = false;
+    let historyData = [];
+    let paymentsData = [];
+    let hourlyPPData = [];
+    let satsLast24h = "0";
+    let lastPaymentAmount = "0";
+    let lastPaymentTime = "";
+    let originalLastPaymentTime = "";
+    let prizePool = "0"; // Added for Next Reward calculation
+    let currentTimezone = localStorage.getItem('timezone') || 'UTC';
+    let timeFormat = localStorage.getItem('timeFormat') || '24';
+    let minDataDate = moment.tz('2025-02-10', 'UTC').startOf('day');
+    let maxDataDate = moment().tz('UTC').endOf('day');
+
+    document.getElementById('timezoneSelect').value = currentTimezone;
+    document.getElementById('timeFormatSelect').value = timeFormat;
+    document.getElementById('currencySelect').value = selectedCurrency;
+
+    // Fetch BTC prices for multiple currencies
+    async function fetchBTCPrices() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp,jpy,cny,aud,cad,inr');
+            const data = await response.json();
+            btcPrices = {
+                usd: data.bitcoin.usd || 0,
+                eur: data.bitcoin.eur || 0,
+                gbp: data.bitcoin.gbp || 0,
+                jpy: data.bitcoin.jpy || 0,
+                cny: data.bitcoin.cny || 0,
+                aud: data.bitcoin.aud || 0,
+                cad: data.bitcoin.cad || 0,
+                inr: data.bitcoin.inr || 0
+            };
+            btcPricesLoaded = true;
+            if (isFiatConversionEnabled) updateFiatValues();
+        } catch (e) {
+            console.error('Error fetching BTC prices:', e);
+            btcPrices = { usd: 0, eur: 0, gbp: 0, jpy: 0, cny: 0, aud: 0, cad: 0, inr: 0 };
+            btcPricesLoaded = true;
+            updateFiatValues();
+        }
+    }
+
+// Convert sats to selected fiat currency for value boxes (with parentheses)
+function satsToFiat(sats) {
+    if (sats == null) return '';
+    if (!btcPricesLoaded) return 'Loading...';
+    if (!btcPrices[selectedCurrency]) return '';
+    const btc = sats / 100000000;
+    const fiat = btc * btcPrices[selectedCurrency];
+    const currencySymbols = {
+        usd: '$',
+        eur: '€',
+        gbp: '£',
+        jpy: '¥',
+        cny: '¥',
+        aud: 'A$',
+        cad: 'C$',
+        inr: '₹'
+    };
+    const currencySymbol = currencySymbols[selectedCurrency] || '$';
+    const formattedNumber = fiat.toLocaleString('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    return `(${currencySymbol}${formattedNumber})`;
+}
+
+// Convert sats to selected fiat currency for table (without parentheses)
+function satsToFiatTable(sats) {
+    if (sats == null) return '';
+    if (!btcPricesLoaded) return 'Loading...';
+    if (!btcPrices[selectedCurrency]) return '';
+    const btc = sats / 100000000;
+    const fiat = btc * btcPrices[selectedCurrency];
+    const currencySymbols = {
+        usd: '$',
+        eur: '€',
+        gbp: '£',
+        jpy: '¥',
+        cny: '¥',
+        aud: 'A$',
+        cad: 'C$',
+        inr: '₹'
+    };
+    const currencySymbol = currencySymbols[selectedCurrency] || '$';
+    const formattedNumber = fiat.toLocaleString('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    return `${currencySymbol}${formattedNumber}`;
+}
+
+
+    // Update fiat values
+    function updateFiatValues() {
+        try {
+            const satsLast24hElement = document.getElementById('satsLast24hFiat');
+            const selectedDaySatsElement = document.getElementById('selectedDaySatsFiat');
+            const lastPaymentElement = document.getElementById('lastPaymentFiat');
+            const nextPaymentElement = document.getElementById('nextPaymentFiat');
+
+            const satsLast24hSats = parseFloat(satsLast24h.replace(/,/g, '')) || 0;
+            const selectedDaySatsSats = parseFloat(document.getElementById('selectedDaySats').textContent.replace(/,/g, '')) || 0;
+            const lastPaymentSats = parseFloat(lastPaymentAmount.replace(/,/g, '')) || 0;
+            const nextPaymentSats = parseFloat(document.getElementById('nextPaymentValue').textContent.replace(/,/g, '')) || 0;
+
+            satsLast24hElement.textContent = isFiatConversionEnabled ? satsToFiat(satsLast24hSats) : '';
+            selectedDaySatsElement.textContent = isFiatConversionEnabled ? satsToFiat(selectedDaySatsSats) : '';
+            lastPaymentElement.textContent = isFiatConversionEnabled ? satsToFiat(lastPaymentSats) : '';
+            nextPaymentElement.textContent = isFiatConversionEnabled ? satsToFiat(nextPaymentSats) : '';
+
+            satsLast24hElement.style.display = isFiatConversionEnabled ? 'block' : 'none';
+            selectedDaySatsElement.style.display = isFiatConversionEnabled ? 'block' : 'none';
+            lastPaymentElement.style.display = isFiatConversionEnabled ? 'block' : 'none';
+            nextPaymentElement.style.display = isFiatConversionEnabled ? 'block' : 'none';
+        } catch (e) {
+            console.error('Error updating fiat values:', e);
+            document.getElementById('satsLast24hFiat').textContent = 'N/A';
+            document.getElementById('selectedDaySatsFiat').textContent = 'N/A';
+            document.getElementById('lastPaymentFiat').textContent = 'N/A';
+            document.getElementById('nextPaymentFiat').textContent = 'N/A';
+        }
+    }
+
+    // Toggle fiat conversion
+    function toggleFiatConversion() {
+        try {
+            isFiatConversionEnabled = document.getElementById('fiatToggle').checked;
+            localStorage.setItem('fiatConversion', isFiatConversionEnabled);
+            document.getElementById('currencySelectContainer').style.display = isFiatConversionEnabled ? 'block' : 'none';
+
+            const valueBoxes = document.querySelectorAll('.value-box');
+            valueBoxes.forEach(box => {
+                if (isFiatConversionEnabled) {
+                    box.classList.add('fiat-enabled');
+                } else {
+                    box.classList.remove('fiat-enabled');
+                }
+            });
+
+            updateFiatValues();
+            filterTable();
+        } catch (e) {
+            console.error('Error toggling fiat conversion:', e);
+        }
+    }
+
+    // Change currency
+    function changeCurrency() {
+        try {
+            selectedCurrency = document.getElementById('currencySelect').value;
+            localStorage.setItem('currency', selectedCurrency);
+            updateFiatValues();
+            filterTable();
+        } catch (e) {
+            console.error('Error changing currency:', e);
+        }
+    }
+
+    // Load fiat conversion preference
+    function loadFiatConversionPreference() {
+        try {
+            const fiatConversion = localStorage.getItem('fiatConversion');
+            const valueBoxes = document.querySelectorAll('.value-box');
+            // Default to true (Fiat enabled) if no preference is saved
+            isFiatConversionEnabled = fiatConversion === null ? true : fiatConversion === 'true';
+            document.getElementById('fiatToggle').checked = isFiatConversionEnabled;
+            document.getElementById('currencySelectContainer').style.display = isFiatConversionEnabled ? 'block' : 'none';
+            valueBoxes.forEach(box => {
+                if (isFiatConversionEnabled) {
+                    box.classList.add('fiat-enabled');
+                } else {
+                    box.classList.remove('fiat-enabled');
+                }
+            });
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error loading fiat conversion preference:', e);
+            // Fallback to enabling Fiat on error
+            isFiatConversionEnabled = true;
+            document.getElementById('fiatToggle').checked = true;
+            document.getElementById('currencySelectContainer').style.display = 'block';
+            valueBoxes.forEach(box => box.classList.add('fiat-enabled'));
+            updateFiatValues();
+        }
+    }
+
+    // Format last payment time
+    function formatLastPaymentTime() {
+        try {
+            const element = document.getElementById('lastPaymentTime');
+            if (!originalLastPaymentTime) {
+                element.textContent = 'N/A';
+                return;
+            }
+            const momentDate = moment.utc(originalLastPaymentTime);
+            if (!momentDate.isValid()) {
+                element.textContent = 'Invalid Time';
+                return;
+            }
+            const targetDate = momentDate.tz(currentTimezone);
+            const formatString = timeFormat === '24' ? 'MMM D HH:mm' : 'MMM D h:mm A';
+            element.textContent = targetDate.format(formatString);
+        } catch (e) {
+            console.error('Error formatting lastPaymentTime:', e);
+            document.getElementById('lastPaymentTime').textContent = 'Error';
+        }
+    }
+
+    // Calculate next payment
+    function calculateNextPayment() {
+        try {
+            let prizePoolNum = parseFloat(prizePool.replace(/,/g, '')) || 0;
+            if (isNaN(prizePoolNum) || prizePoolNum === 0) {
+                console.warn('Prize pool is invalid or zero, using fallback value');
+                prizePoolNum = 5085600; // Fallback to approximate prize pool for 2094 reward
+            }
+            const nextPayment = prizePoolNum * 0.000416667;
+            return Math.floor(nextPayment).toLocaleString('en-US');
+        } catch (e) {
+            console.error('Error calculating next payment:', e);
+            return 'N/A';
+        }
+    }
+
+    // Update next payment
+    function updateNextPayment() {
+        try {
+            const element = document.getElementById('nextPaymentValue');
+            const nextPaymentValue = calculateNextPayment();
+            element.textContent = nextPaymentValue === 'N/A' ? 'N/A' : nextPaymentValue;
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error updating next payment:', e);
+            document.getElementById('nextPaymentValue').textContent = 'Error';
+        }
+    }
+
+    function parseLocaleNumber(str) {
+        if (!str || typeof str !== 'string') return NaN;
+        const cleaned = str.replace(/[^0-9.-]/g, '');
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? NaN : num;
+    }
+
+    function formatDateForLabel(dateStr) {
+        if (!dateStr) return "No date selected";
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return "Invalid date";
+        return "on " + date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).replace(/,/, '');
+    }
+
+    function formatDate(date) {
+        try {
+            const momentDate = moment(date).tz(currentTimezone);
+            return momentDate.isValid() ? momentDate.format(timeFormat === '24' ? 'MMM D HH:mm' : 'MMM D h:mm A') : "Invalid Date";
+        } catch (e) {
+            console.error("Error formatting date:", e);
+            return "Unknown Date";
+        }
+    }
+
+    function deduplicatePayments() {
+        const uniquePaymentsData = [];
+        const seen = new Set();
+        paymentsData.forEach(entry => {
+            if (!entry || !entry.time || !entry.paymentAmount) return;
+            const key = `${entry.time}|${entry.paymentAmount}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniquePaymentsData.push(entry);
+            } else {
+            }
+        });
+        return uniquePaymentsData;
+    }
+
+    function findClosestHourlyEntries(data) {
+        const hourlyEntries = {};
+        data.forEach(entry => {
+            if (!entry || !entry.time || !entry.prizePool) return;
+            const date = new Date(entry.time);
+            if (isNaN(date.getTime())) return;
+            const prizePool = parseLocaleNumber(entry.prizePool);
+            if (isNaN(prizePool)) return;
+            const momentDate = moment.utc(date).tz(currentTimezone);
+            const hourKey = momentDate.format('YYYY-MM-DD HH:00');
+            if (!hourlyEntries[hourKey] || Math.abs(momentDate.minutes()) < Math.abs(moment(new Date(hourlyEntries[hourKey].time)).tz(currentTimezone).minutes())) {
+                hourlyEntries[hourKey] = entry;
+            }
+        });
+        return Object.values(hourlyEntries);
+    }
+
+function filterTable() {
+    try {
+        const selectedDate = document.getElementById('dateFilter').value;
+        const selectedDataFilter = document.getElementById('dataFilter').value;
+        const historyTable = document.getElementById('historyTable');
+        const tableHeader = document.getElementById('tableHeader');
+        const tableWrapper = document.getElementById('historyTableWrapper');
+        const selectedDaySats = document.getElementById('selectedDaySats');
+        const highestHashrate = document.getElementById('highestHashrate');
+        const lowestHashrate = document.getElementById('lowestHashrate');
+        const averageHashrate = document.getElementById('averageHashrate');
+        const satsDate = document.getElementById('satsDate');
+        const highestHashrateDate = document.getElementById('highestHashrateDate');
+        const lowestHashrateDate = document.getElementById('lowestHashrateDate');
+        const averageHashrateDate = document.getElementById('averageHashrateDate');
+        historyTable.innerHTML = '';
+        if (selectedDataFilter === 'payments') {
+            tableWrapper.classList.add('payment-only');
+        } else {
+            tableWrapper.classList.remove('payment-only');
+        }
+        const formattedDate = formatDateForLabel(selectedDate);
+        satsDate.innerText = formattedDate;
+        highestHashrateDate.innerText = formattedDate;
+        lowestHashrateDate.innerText = formattedDate;
+        averageHashrateDate.innerText = formattedDate;
+
+        let filteredData = [];
+        const uniquePaymentsData = deduplicatePayments();
+        if (selectedDataFilter === 'all') {
+            filteredData = [...historyData, ...uniquePaymentsData];
+            tableHeader.innerHTML = `<tr><th>Prize Pool</th><th>Hashrate</th><th>Date & Time</th></tr>`;
+        } else if (selectedDataFilter === 'payments') {
+            filteredData = uniquePaymentsData;
+            tableHeader.innerHTML = `<tr><th>Reward</th><th>Date & Time</th></tr>`;
+        } else if (selectedDataFilter === 'hourly') {
+            filteredData = findClosestHourlyEntries(historyData);
+            tableHeader.innerHTML = `<tr><th>Prize Pool</th><th>Hashrate</th><th>Date & Time</th></tr>`;
+        }
+
+        let totalSatsSelectedDay = 0;
+        let highestHashrateValue = null;
+        let lowestHashrateValue = null;
+        let averageHashrateValue = null;
+
+        if (selectedDate) {
+            const startMoment = moment.tz(selectedDate + ' 00:00:00', currentTimezone);
+            const endMoment = moment.tz(selectedDate + ' 23:59:59', currentTimezone);
+            const paymentsOnSelectedDay = uniquePaymentsData.filter(entry => {
+                const entryTime = moment.utc(entry.time).tz(currentTimezone);
+                return entryTime.isBetween(startMoment, endMoment, null, '[]');
+            });
+            totalSatsSelectedDay = paymentsOnSelectedDay.reduce((sum, entry) => sum + parseLocaleNumber(entry.paymentAmount), 0);
+            const hashratesOnSelectedDay = historyData.filter(entry => {
+                if (!entry || !entry.time) return false;
+                const entryTime = moment.utc(entry.time).tz(currentTimezone);
+                return entryTime.isBetween(startMoment, endMoment, null, '[]');
+            }).map(entry => parseLocaleNumber(entry.hashrate)).filter(v => !isNaN(v));
+            if (hashratesOnSelectedDay.length > 0) {
+                highestHashrateValue = Math.max(...hashratesOnSelectedDay);
+                lowestHashrateValue = Math.min(...hashratesOnSelectedDay);
+                averageHashrateValue = hashratesOnSelectedDay.reduce((sum, val) => sum + val, 0) / hashratesOnSelectedDay.length;
+            }
+            filteredData = filteredData.filter(entry => {
+                if (!entry || !entry.time) return false;
+                const entryTime = moment.utc(entry.time).tz(currentTimezone);
+                return entryTime.isBetween(startMoment, endMoment, null, '[]');
+            });
+        }
+
+        selectedDaySats.innerText = totalSatsSelectedDay.toLocaleString('en-US');
+        highestHashrate.innerText = highestHashrateValue !== null ? highestHashrateValue.toLocaleString('en-US') : 'N/A';
+        lowestHashrate.innerText = lowestHashrateValue !== null ? lowestHashrateValue.toLocaleString('en-US') : 'N/A';
+        averageHashrate.innerText = averageHashrateValue !== null ? Math.round(averageHashrateValue).toLocaleString('en-US') : 'N/A';
+        updateFiatValues();
+
+        filteredData.sort((a, b) => new Date(b.time) - new Date(a.time));
+        if (filteredData.length === 0) {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td colspan="${selectedDataFilter === 'payments' ? 2 : 3}">No data available for selected date</td>`;
+            historyTable.appendChild(row);
+        } else {
+            filteredData.forEach(entry => {
+                const row = document.createElement("tr");
+                const time = moment.utc(entry.time).tz(currentTimezone);
+                const formattedTime = time.format(timeFormat === '24' ? 'MMM D HH:mm' : 'MMM D h:mm A');
+                if (entry.paymentAmount) {
+                    row.classList.add("payment-entry");
+                    const rewardSats = entry.paymentAmount;
+                    const rewardFiat = isFiatConversionEnabled && btcPrices[selectedCurrency] ? ` <span class="fiat-separator">|</span> <span class="fiat-value">${satsToFiatTable(parseFloat(rewardSats.replace(/,/g, '')))}</span>` : '';
+                    if (selectedDataFilter === 'payments') {
+                        row.innerHTML = `<td>Reward: ${rewardSats}${rewardFiat}</td><td>${formattedTime}</td>`;
+                    } else {
+                        row.innerHTML = `<td colspan="2">Reward: ${rewardSats}${rewardFiat}</td><td>${formattedTime}</td>`;
+                    }
+                } else {
+                    row.classList.add("data-row");
+                    const hashrate = parseLocaleNumber(entry.hashrate);
+                    const hashrateDisplay = isNaN(hashrate) ? 'N/A' : entry.hashrate;
+                    const prizePoolSats = entry.prizePool || 'N/A';
+                    const prizePoolFiat = isFiatConversionEnabled && btcPrices[selectedCurrency] && prizePoolSats !== 'N/A' ? ` <span class="fiat-separator">|</span> <span class="fiat-value">${satsToFiatTable(parseFloat(prizePoolSats.replace(/,/g, '')))}</span>` : '';
+                    row.innerHTML = `<td>${prizePoolSats}${prizePoolFiat}</td><td>${hashrateDisplay}</td><td>${formattedTime}</td>`;
+                }
+                historyTable.appendChild(row);
+            });
+        }
+    } catch (e) {
+        console.error('Error in filterTable:', e);
+        document.getElementById('historyTable').innerHTML = '<tr><td colspan="3">Error loading table</td></tr>';
+    }
+}
+
+    async function initializeData() {
+        try {
+            const data = await window.processData();
+            satsLast24h = (typeof data.satsLast24h === 'string' || typeof data.satsLast24h === 'number') ? String(data.satsLast24h) : "0";
+            lastPaymentAmount = data.lastPaymentAmount || "0";
+            lastPaymentTime = data.lastPaymentTime || "";
+            originalLastPaymentTime = lastPaymentTime;
+            prizePool = data.prizePool || "5085600"; // Fallback to approximate prize pool if not provided
+
+            document.querySelectorAll('#satsLast24h').forEach(element => {
+                element.textContent = satsLast24h;
+            });
+            document.getElementById('lastPaymentAmount').textContent = lastPaymentAmount;
+            document.getElementById('lastPaymentTime').textContent = lastPaymentTime;
+
+            historyData = [];
+            paymentsData = [];
+            hourlyPPData = [];
+            try {
+                if (data.historyData) {
+                    historyData = JSON.parse(data.historyData);
+                    if (!Array.isArray(historyData)) throw new Error('historyData is not an array');
+                }
+            } catch (e) {
+                console.error('Error parsing historyData:', e);
+            }
+            try {
+                if (data.paymentsData) {
+                    paymentsData = JSON.parse(data.paymentsData);
+                    if (!Array.isArray(paymentsData)) throw new Error('paymentsData is not an array');
+                }
+            } catch (e) {
+                console.error('Error parsing paymentsData:', e);
+            }
+            try {
+                if (data.hourlyPPData) {
+                    hourlyPPData = JSON.parse(data.hourlyPPData);
+                    if (!Array.isArray(hourlyPPData)) throw new Error('hourlyPPData is not an array');
+                }
+            } catch (e) {
+                console.error('Error parsing hourlyPPData:', e);
+            }
+
+            const allDates = [
+                ...historyData.map(entry => entry && entry.time ? new Date(entry.time) : null),
+                ...paymentsData.map(entry => entry && entry.time ? new Date(entry.time) : null),
+                ...hourlyPPData.map(entry => entry && entry.time && !isNaN(parseLocaleNumber(entry.prizePool)) ? new Date(entry.time) : null)
+            ].filter(d => d && !isNaN(d.getTime()));
+            maxDataDate = allDates.length > 0 ? moment(Math.max(...allDates)).tz(currentTimezone).endOf('day') : moment().tz(currentTimezone).endOf('day');
+            if (minDataDate.isAfter(maxDataDate)) {
+                minDataDate = moment.tz('2025-02-10', currentTimezone).startOf('day');
+            }
+            const defaultDate = maxDataDate.format('YYYY-MM-DD');
+            document.getElementById('dateFilter').value = defaultDate;
+            flatpickr('#dateFilter', {
+                mode: 'single',
+                dateFormat: 'Y-m-d',
+                minDate: minDataDate.format('YYYY-MM-DD'),
+                maxDate: maxDataDate.format('YYYY-MM-DD'),
+                defaultDate: defaultDate,
+                onChange: function(selectedDates, dateStr) {
+                    filterTable();
+                }
+            });
+
+            await fetchBTCPrices();
+            loadFiatConversionPreference();
+            formatLastPaymentTime();
+            updateNextPayment();
+            document.getElementById('countdown').textContent = 'Based on the final prize pool';
+            filterTable();
+        } catch (e) {
+            console.error('Error initializing data:', e);
+            document.getElementById('satsLast24h').textContent = 'Error';
+            document.getElementById('lastPaymentAmount').textContent = 'Error';
+            document.getElementById('lastPaymentTime').textContent = 'Error';
+            document.getElementById('nextPaymentValue').textContent = 'Error';
+            document.getElementById('historyTable').innerHTML = '<tr><td colspan="3">Error loading table</td></tr>';
+        }
+    }
+
+    function changeTimezone() {
+        try {
+            currentTimezone = document.getElementById('timezoneSelect').value;
+            localStorage.setItem('timezone', currentTimezone);
+            minDataDate = moment.tz('2025-02-10', currentTimezone).startOf('day');
+            formatLastPaymentTime();
+            filterTable();
+        } catch (e) {
+            console.error('Error changing timezone:', e);
+        }
+    }
+
+    function changeTimeFormat() {
+        try {
+            timeFormat = document.getElementById('timeFormatSelect').value;
+            localStorage.setItem('timeFormat', timeFormat);
+            formatLastPaymentTime();
+            filterTable();
+        } catch (e) {
+            console.error('Error changing time format:', e);
+        }
+    }
+
+    function toggleMenu() {
+        const menuContent = document.getElementById('menuContent');
+        if (menuContent) {
+            menuContent.classList.toggle('show');
+        }
+    }
+
+    function closeMenuOnOutsideClick(event) {
+        const menuContent = document.getElementById('menuContent');
+        const menuToggle = document.querySelector('.menu');
+        if (!menuContent || !menuToggle) return;
+        if (menuContent.classList.contains('show')) {
+            if (!menuContent.contains(event.target) && !menuToggle.contains(event.target)) {
+                menuContent.classList.remove('show');
+            }
+        }
+    }
+
+    function scrollToSection(selector) {
+        try {
+            const element = document.querySelector(selector);
+            if (element) {
+                const scrollTop = element.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({ top: scrollTop, behavior: 'auto' });
+            }
+        } catch (e) {
+            console.error(`Scroll to ${selector} error:`, e);
+        }
+    }
+
+    function toggleDarkMode() {
+        try {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            document.getElementById('themeToggle').checked = isDarkMode;
+        } catch (e) {
+            console.error('Error toggling dark mode:', e);
+        }
+    }
+
+    function loadDarkModePreference() {
+        try {
+            const darkMode = localStorage.getItem('darkMode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (darkMode === 'true') {
+                document.body.classList.add('dark-mode');
+                if (themeToggle) themeToggle.checked = true;
+            } else {
+                if (themeToggle) themeToggle.checked = false;
+            }
+        } catch (e) {
+            console.error('Error loading dark mode preference:', e);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.menu-content a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('data-scroll-target');
+                if (target) scrollToSection(target);
+                const menuContent = document.getElementById('menuContent');
+                if (menuContent) menuContent.classList.remove('show');
+            });
+        });
+        const menuContent = document.getElementById('menuContent');
+        if (menuContent) {
+            menuContent.addEventListener('click', e => e.stopPropagation());
+        }
+        document.addEventListener('click', closeMenuOnOutsideClick);
+        document.getElementById('dataFilter').addEventListener('change', filterTable);
+        loadDarkModePreference();
+        loadFiatConversionPreference();
+        initializeData();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+  const tooltips = document.querySelectorAll('.tooltip');
+  tooltips.forEach(tooltip => {
+    const tooltipText = tooltip.querySelector('.tooltiptext');
+    const infoIcon = tooltip.querySelector('.info-icon');
+
+    if (infoIcon && tooltipText) {
+      infoIcon.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Toggle the show class
+        tooltipText.classList.toggle('show');
+      });
+
+      // Close tooltip when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!tooltip.contains(e.target) && tooltipText.classList.contains('show')) {
+          tooltipText.classList.remove('show');
+        }
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>

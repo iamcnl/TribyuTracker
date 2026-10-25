@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Calculator</title>
+    <script src="script.js" defer></script>
+    <link rel="icon" type="image/png" href="img/TribyuLogo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+  <a href="index.html" class="header-logo-link">
+    <img src="img/TribyuLogo.png" alt="Logo" class="header-logo">
+    <span class="header-title">Tribyu Tracker</span>
+  </a>
+  <div class="nav-container">
+    <nav class="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="detail.html">Detail Stats</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="about.html">About</a>
+    </nav>
+    <div class="menu" onclick="toggleMenu()">☰</div>
+  </div>
+</header>
+<div class="archive-banner">
+    <strong class="archive-banner-title">Tribyu was cancelled in 2025.</strong>
+    <span>This tracker is an archive of data from 10 Feb – 30 Sep 2025 and is no longer updated. <a href="about.html">What was Tribyu?</a></span>
+</div>
+<div class="menu-content" id="menuContent">
+    <div class="theme-toggle">
+        <span class="icon sun" title="Light Mode">☀</span>
+        <label class="switch">
+            <input type="checkbox" id="themeToggle" onchange="toggleDarkMode()">
+            <span class="slider"></span>
+        </label>
+        <span class="icon moon" title="Dark Mode">🌙</span>
+    </div>
+    <hr class="menu-divider">
+    <div class="fiat-toggle">
+        <span class="icon dollar" title="Show Fiat">💵</span>
+        <label class="switch">
+            <input type="checkbox" id="fiatToggle" onchange="toggleFiatConversion()">
+            <span class="slider"></span>
+        </label>
+        <span class="icon sats" title="Hide Fiat">⚡</span>
+    </div>
+    <hr class="menu-divider">
+    <div id="currencySelectContainer" style="display: none;">
+        <select id="currencySelect" onchange="changeCurrency()">
+            <option value="usd">USD ($)</option>
+            <option value="eur">EUR (€)</option>
+            <option value="gbp">GBP (£)</option>
+            <option value="jpy">JPY (¥)</option>
+            <option value="cny">CNY (¥)</option>
+            <option value="aud">AUD (A$)</option>
+            <option value="cad">CAD (C$)</option>
+            <option value="inr">INR (₹)</option>
+        </select>
+    </div>
+    <hr class="menu-divider">
+    <select id="timezoneSelect" onchange="changeTimezone()">
+        <option value="Etc/GMT+12">Baker Island (UTC-12)</option>
+        <option value="Pacific/Honolulu">Honolulu (UTC-10)</option>
+        <option value="America/Anchorage">Anchorage (UTC-9)</option>
+        <option value="America/Los_Angeles">Los Angeles (UTC-8)</option>
+        <option value="America/Denver">Denver (UTC-7)</option>
+        <option value="America/Chicago">Chicago (UTC-6)</option>
+        <option value="America/New_York">New York (UTC-5)</option>
+        <option value="America/Caracas">Caracas (UTC-4)</option>
+        <option value="America/Halifax">Halifax (UTC-3)</option>
+        <option value="America/Noronha">Fernando de Noronha (UTC-2)</option>
+        <option value="Atlantic/Azores">Azores (UTC-1)</option>
+        <option value="UTC">UTC</option>
+        <option value="Europe/London">London (UTC+0)</option>
+        <option value="Europe/Berlin">Berlin (UTC+1)</option>
+        <option value="Europe/Athens">Athens (UTC+2)</option>
+        <option value="Asia/Istanbul">Istanbul (UTC+3)</option>
+        <option value="Asia/Dubai">Dubai (UTC+4)</option>
+        <option value="Asia/Karachi">Karachi (UTC+5)</option>
+        <option value="Asia/Kolkata">Delhi (UTC+5:30)</option>
+        <option value="Asia/Dhaka">Dhaka (UTC+6)</option>
+        <option value="Asia/Bangkok">Bangkok (UTC+7)</option>
+        <option value="Asia/Shanghai">Shanghai (UTC+8)</option>
+        <option value="Asia/Tokyo">Tokyo (UTC+9)</option>
+        <option value="Australia/Sydney">Sydney (UTC+10)</option>
+        <option value="Pacific/Noumea">Nouméa (UTC+11)</option>
+        <option value="Pacific/Auckland">Auckland (UTC+12)</option>
+        <option value="Pacific/Apia">Apia (UTC+13)</option>
+        <option value="Pacific/Kiritimati">Kiritimati (UTC+14)</option>
+    </select>
+    <hr class="menu-divider">
+    <select id="timeFormatSelect" onchange="changeTimeFormat()">
+        <option value="24">24-Hour</option>
+        <option value="12">12-Hour</option>
+    </select>
+</div>
+
+<div class="calculator-layout">
+  <aside class="side-panel left-placeholder">
+    <!-- Empty placeholder to maintain layout balance -->
+  </aside>
+  <section class="calculator-section" id="calculator-stats">
+    <div class="card-columns">
+        <div class="column-left">
+            <div class="card input-card">
+                <span class="card-label">Current Prize Pool</span>
+                <div class="input-container">
+                    <input type="text" id="currentPrizePool" placeholder="Current prize pool" min="0">
+                    <img src="img/reset.png" alt="Reset" class="reset-icon" title="Reset to current prize pool" onclick="resetPrizePool()">
+                </div>
+                <span class="fiat-value" id="currentPrizePoolFiat"></span>
+            </div>
+            <div class="card input-card">
+                <span class="card-label" id="hashrateLabel">Current Hashrate</span>
+                <div class="input-container hashrate-input-container">
+                    <input type="text" id="currentHashrate" placeholder="Current hashrate" min="0">
+                    <img src="img/reset.png" alt="Reset" class="reset-icon" title="Reset to current value" onclick="resetHashrate()">
+                </div>
+            </div>
+            <div class="card input-card">
+                <span class="card-label">Your Hashrate</span>
+                <input type="text" id="playerHashrate" placeholder="Your hashrate" min="0" value="250">
+                <span id="hashrateWarning" class="warning"></span>
+            </div>
+            <div class="card clickable-card" onclick="toggleFormulaPopup('globalReward')">
+                <span class="card-label">Next Global Reward</span>
+                <span class="card-value" id="globalNextReward">Loading...</span>
+                <span class="fiat-value" id="globalNextRewardFiat"></span>
+                <div class="tooltip">
+                    <img src="img/info-icon.png" alt="Info" class="info-icon">
+                </div>
+                <div class="formula-popup" id="globalRewardPopup">
+                    <div class="formula-content">
+                        <h5>Next Global Reward Calculation</h5>
+                        <div class="formula-box">
+                            <code>Global Reward = (Prize <br> Pool × 0.000416667)</code>
+                        </div>
+                        <div class="formula-calculation">
+                            <p><strong>Current Calculation:</strong></p>
+                            <p>Global Reward = (<span id="formulaPrizePoolValue">Loading...</span> × 0.000416667) = <span id="formulaGlobalResult">Loading...</span> sats</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column-right">
+            <div class="card clickable-card" onclick="toggleFormulaPopup('yourReward')">
+                <span class="card-label">Your Next Reward</span>
+                <span class="card-value" id="playerNextReward">0</span>
+                <span class="fiat-value" id="playerNextRewardFiat"></span>
+                <div class="tooltip">
+                    <img src="img/info-icon.png" alt="Info" class="info-icon">
+                </div>
+                <div class="formula-popup" id="yourRewardPopup">
+                    <div class="formula-content">
+                        <h5>Your Next Reward Calculation</h5>
+                        <div class="formula-box">
+                            <code>Your Reward = (Your Hashrate ÷ Total Hashrate) × Global Reward</code>
+                        </div>
+                        <div class="formula-calculation">
+                            <p><strong>Current Calculation:</strong></p>
+                            <p>Next Reward = (<span id="formulaPlayerHashrateValue">Loading...</span> ÷ <span id="formulaTotalHashrateValue">Loading...</span>) × <span id="formulaGlobalRewardValue">Loading...</span> = <span id="formulaPlayerResult">Loading...</span> sats</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="card-label">Your 24h Earnings</span>
+                <span class="card-value" id="earnings24h">0</span>
+                <span class="fiat-value" id="earnings24hFiat"></span>
+            </div>
+            <div class="card">
+                <span class="card-label">Your 7d Earnings</span>
+                <span class="card-value" id="earnings7d">0</span>
+                <span class="fiat-value" id="earnings7dFiat"></span>
+            </div>
+            <div class="card">
+                <span class="card-label">Your 30d Earnings</span>
+                <span class="card-value" id="earnings30d">0</span>
+                <span class="fiat-value" id="earnings30dFiat"></span>
+            </div>
+        </div>
+    </div>
+</section>
+  <aside class="side-panel">
+    <div class="card">
+      <span class="card-label">Settings</span>
+      <div class="avg-hashrate-toggle">
+        <label class="switch">
+          <input type="checkbox" id="avgHashrateToggle" onchange="toggleAverageHashrate()">
+          <span class="slider"></span>
+        </label>
+        <span>Use average hashrate</span>
+        <select id="avgPeriodSelect" onchange="updateAverageHashrate()" style="display: none;">
+          <option value="24h">24 hours</option>
+          <option value="7d" selected>7 days</option>
+          <option value="30d">30 days</option>
+        </select>
+      </div>
+      <hr class="menu-divider-settings">
+      <div class="joules-consumption">
+                  <span class="card-label">Joules: Sell/Use
+                    <span class="tooltip">
+                        <img src="img/info-icon.png" alt="Info" class="info-icon">
+                      <span class="tooltiptext">
+              This option helps you decide if it is better to use your Joules for powering ASICs or selling them in the Auction House.
+              <br><br>
+              <strong>How it works:</strong>
+              <br><br>
+              • Enter your ASIC count to see your daily Joules consumption<br>
+              • We show the <strong>average market price</strong> for 10,000 Joules<br>
+              &nbsp;&nbsp;(based on recent sales and current offers)<br>
+              • <strong>Daily P/L</strong> shows the better option:<br>
+              &nbsp;&nbsp;• <span style="color: #4CAF50;">Green </span><span>= Powering is more profitable</span><br>
+              &nbsp;&nbsp;• <span style="color: #f44336;">Red </span><span>= Selling is more profitable</span>
+              <br><br>
+            </span>
+          </span>
+        <div class="joules-boxes">
+          <div class="joules-box">
+            <span class="box-label">ASICs</span>
+            <input type="number" id="asicCount" placeholder="0" min="0" value="0">
+          </div>
+          <div class="joules-box">
+            <span class="box-label">Daily Joules</span>
+            <span class="box-value" id="dailyJoules">0</span>
+          </div>
+        </div>
+        <div class="joules-boxes">
+          <div class="joules-box avg-joules-box clickable-box" onclick="toggleAvgJoulesPopup(event)">
+                <img src="img/info-icon.png" alt="Info" class="info-icon">
+            <span class="box-label">Avg Joules Price</span>
+            <div class="input-container">
+                <input type="text" inputmode="numeric" id="avgJoulesPrice" placeholder="Loading...">
+                <img src="img/reset.png" alt="Reset" class="reset-icon" title="Reset to calculated price" onclick="resetAvgJoulesPrice(event)">
+            </div>
+            <div class="avg-joules-popup" id="avgJoulesPopup">
+              <div class="avg-joules-header">How it's calculated</div>
+              <div class="avg-joules-sub">Average price per 10,000 Joules is estimated using a weighted blend of the most recent sales and the current offers. </div>
+              <div class="avg-joules-metrics">
+                <div><strong>Recent Sales Avg:</strong> <span id="avgJoulesSalesAvg">-</span></div>
+                <div><strong>Offers Avg:</strong> <span id="avgJoulesOffersAvg">-</span></div>
+                <div><strong>Weighted Avg:</strong> <span id="avgJoulesWeighted">-</span></div>
+              </div>
+              <div class="avg-joules-toggle" onclick="toggleAvgJoulesDetails(event)">Show details</div>
+              <div class="avg-joules-lists" id="avgJoulesDetails" style="display: none;">
+                <div class="avg-joules-list">
+                  <div class="list-title">Recent Sales (last 5)</div>
+                  <div id="avgJoulesRecentSales">Loading...</div>
+                </div>
+                <div class="avg-joules-list">
+                  <div class="list-title">Current Offers (up to 5)</div>
+                  <div id="avgJoulesCurrentOffers">Loading...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="joules-box clickable-box" onclick="toggleProfitLossBreakdown()" id="dailyPLBox">
+                <img src="img/info-icon.png" alt="Info" class="info-icon">
+            <span class="box-label">Daily P/L</span>
+            <span class="box-value" id="dailyProfitLoss">Loading...</span>
+            <div class="pl-breakdown-popup" id="plBreakdownPopup">
+              <div class="breakdown-item total">
+                <span>Cost to Power:</span>
+                <span id="popupPowerCost">-</span>
+              </div>
+              <div class="breakdown-item total">
+                <span>Earnings:</span>
+                <span id="popupMiningEarnings">-</span>
+              </div>
+              <div class="breakdown-separator"></div>
+              <div class="breakdown-item profit">
+                <span>Daily P/L:</span>
+                <span id="popupNetPL">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer class="footer">
+    <div class="footer-container">
+    </div>
+    <div class="footer-bottom">
+        <p>Tribyu Tracker &middot; archived project (2025)</p>
+    </div>
+</footer>
+
+
+
+<script>
+    let btcPrices = { usd: 0, eur: 0, gbp: 0, jpy: 0, cny: 0, aud: 0, cad: 0, inr: 0 };
+    let isFiatConversionEnabled = true;
+    let selectedCurrency = localStorage.getItem('currency') || 'usd';
+    let currentPrizePool = 0;
+    let currentHashrate = 0;
+    let playerHashrate = 0;
+    let currentTimezone = localStorage.getItem('timezone') || 'UTC';
+    let timeFormat = localStorage.getItem('timeFormat') || '24';
+    let defaultPrizePool = 0;
+    let defaultHashrate = 0;
+    let useAverageHashrate = localStorage.getItem('useAverageHashrate') === 'true';
+    let selectedPeriod = localStorage.getItem('avgHashratePeriod') || '7d';
+    let averageHashrate = null;
+    let isAvgHashrateLoading = false;
+    let previousHashrate = null; // Store the previous hashrate when toggling
+    let asicCount = parseInt(localStorage.getItem('asicCount')) || 0;
+    let cachedAvgJoulesPriceValue = null;
+    let cachedAvgJoulesPriceTimestamp = 0;
+    const AVG_JOULES_PRICE_TTL_MS = 5 * 60 * 1000;
+    let defaultAvgJoulesPrice = 0;
+    let isUsingCustomJoulesPrice = false;
+
+    function setDefaultAvgJoulesPrice(price) {
+        defaultAvgJoulesPrice = price;
+        document.getElementById('avgJoulesPrice').value = formatWithCommas(Math.round(price));
+        return price;
+    }
+
+    // Global data cache to avoid multiple API calls
+    let globalDataCache = null;
+    let globalDataCacheTimestamp = 0;
+    const GLOBAL_DATA_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+    // Centralized function to get data with caching
+    async function getCachedData() {
+        const now = Date.now();
+        if (globalDataCache && (now - globalDataCacheTimestamp) < GLOBAL_DATA_TTL_MS) {
+            return globalDataCache;
+        }
+
+        // Fetch fresh data and cache it - use optimized calculator function
+        globalDataCache = await window.processCalculatorData();
+        globalDataCacheTimestamp = now;
+        return globalDataCache;
+    }
+
+    function debounce(func, wait) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            const context = this;
+            timeoutId = setTimeout(() => func.apply(context, args), wait);
+        };
+    }
+
+    document.getElementById('timezoneSelect').value = currentTimezone;
+    document.getElementById('timeFormatSelect').value = timeFormat;
+    document.getElementById('currencySelect').value = selectedCurrency;
+
+    function formatWithCommas(value) {
+        if (value == null || value === '') return '';
+        // Convert to string and remove non-digits
+        let strValue = value.toString().replace(/[^0-9]/g, '');
+        if (strValue === '') return '';
+        // Preserve leading zeros
+        let leadingZeros = strValue.match(/^0*/)[0] || '';
+        let significantDigits = strValue.replace(/^0*/, '') || '';
+        if (significantDigits === '') return leadingZeros;
+        // Add commas every three digits from the right
+        let result = '';
+        for (let i = significantDigits.length - 1, count = 0; i >= 0; i--) {
+            if (count > 0 && count % 3 === 0) result = ',' + result;
+            result = significantDigits[i] + result;
+            count++;
+        }
+        return leadingZeros + result;
+    }
+
+    function parseWithCommas(input) {
+        if (typeof input !== 'string' || input === '') return 0;
+        // Remove commas and validate as digits
+        const cleanInput = input.replace(/,/g, '');
+        if (!/^\d+$/.test(cleanInput)) return 0;
+        return parseFloat(cleanInput) || 0;
+    }
+
+    function formatInputValue(inputElement) {
+        const cursorPosition = inputElement.selectionStart;
+        let value = inputElement.value;
+        // Allow digits and commas only
+        let cleanedValue = value.replace(/[^0-9,]/g, '');
+        if (cleanedValue === '') {
+            inputElement.value = '';
+            return;
+        }
+        // Format only if the input is valid
+        const digitsOnly = cleanedValue.replace(/,/g, '');
+        if (/^\d+$/.test(digitsOnly)) {
+            const formattedValue = formatWithCommas(digitsOnly);
+            inputElement.value = formattedValue;
+            // Adjust cursor position
+            const newCommasBeforeCursor = (formattedValue.slice(0, cursorPosition).match(/,/g) || []).length;
+            const oldCommasBeforeCursor = (value.slice(0, cursorPosition).match(/,/g) || []).length;
+            const cursorAdjustment = newCommasBeforeCursor - oldCommasBeforeCursor;
+            const newCursorPosition = cursorPosition + cursorAdjustment;
+            inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
+        }
+    }
+
+    async function fetchBTCPrices() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp,jpy,cny,aud,cad,inr');
+            const data = await response.json();
+            btcPrices = {
+                usd: data.bitcoin.usd || 0,
+                eur: data.bitcoin.eur || 0,
+                gbp: data.bitcoin.gbp || 0,
+                jpy: data.bitcoin.jpy || 0,
+                cny: data.bitcoin.cny || 0,
+                aud: data.bitcoin.aud || 0,
+                cad: data.bitcoin.cad || 0,
+                inr: data.bitcoin.inr || 0
+            };
+            if (isFiatConversionEnabled) updateFiatValues();
+        } catch (e) {
+            console.error('Error fetching BTC prices:', e);
+            btcPrices = { usd: 0, eur: 0, gbp: 0, jpy: 0, cny: 0, aud: 0, cad: 0, inr: 0 };
+            updateFiatValues();
+        }
+    }
+
+    function satsToFiat(sats) {
+        if (!btcPrices[selectedCurrency] || sats == null || sats === 0) return 'N/A';
+        const btc = sats / 100000000;
+        const fiat = btc * btcPrices[selectedCurrency];
+        const currencySymbols = {
+            usd: '$', eur: '€', gbp: '£', jpy: '¥', cny: '¥', aud: 'A$', cad: 'C$', inr: '₹'
+        };
+        const currencySymbol = currencySymbols[selectedCurrency] || '$';
+        const formattedNumber = fiat.toLocaleString('en-US', {
+            style: 'decimal',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        return `(${currencySymbol}${formattedNumber})`;
+    }
+
+    function updateFiatValues() {
+        try {
+            const elements = [
+                { id: 'currentPrizePoolFiat', sats: currentPrizePool },
+                { id: 'globalNextRewardFiat', sats: parseFloat(document.getElementById('globalNextReward').textContent.replace(/,/g, '')) || 0 }
+            ];
+            elements.forEach(({ id, sats }) => {
+                const element = document.getElementById(id);
+                element.textContent = isFiatConversionEnabled ? satsToFiat(sats) : '';
+                element.style.display = isFiatConversionEnabled ? 'block' : 'none';
+            });
+
+            const rightColumnElements = [
+                { id: 'playerNextRewardFiat', mainId: 'playerNextReward' },
+                { id: 'earnings24hFiat', mainId: 'earnings24h' },
+                { id: 'earnings7dFiat', mainId: 'earnings7d' },
+                { id: 'earnings30dFiat', mainId: 'earnings30d' }
+            ];
+            rightColumnElements.forEach(({ id, mainId }) => {
+                const element = document.getElementById(id);
+                const mainElement = document.getElementById(mainId);
+                const mainText = mainElement.textContent;
+
+                if (mainText === 'Loading...') {
+                    // Show "Loading..." for fiat if conversion is enabled and either player has hashrate or avg hashrate is loading
+                    const shouldShowLoading = isFiatConversionEnabled && (playerHashrate > 0 || (useAverageHashrate && isAvgHashrateLoading));
+                    element.textContent = shouldShowLoading ? 'Loading...' : '';
+                    element.classList.toggle('show', shouldShowLoading);
+                } else {
+                    const sats = parseFloat(mainText.replace(/,/g, '')) || 0;
+                    element.textContent = isFiatConversionEnabled && playerHashrate > 0 ? satsToFiat(sats) : '';
+                    element.classList.toggle('show', isFiatConversionEnabled && playerHashrate > 0);
+                }
+            });
+        } catch (e) {
+            console.error('Error updating fiat values:', e);
+            ['currentPrizePoolFiat', 'globalNextRewardFiat', 'playerNextRewardFiat', 'earnings24hFiat', 'earnings7dFiat', 'earnings30dFiat'].forEach(id => {
+                document.getElementById(id).textContent = 'N/A';
+                document.getElementById(id).classList.remove('show');
+            });
+        }
+    }
+
+    function toggleFiatConversion() {
+        try {
+            isFiatConversionEnabled = document.getElementById('fiatToggle').checked;
+            localStorage.setItem('fiatConversion', isFiatConversionEnabled);
+            document.getElementById('currencySelectContainer').style.display = isFiatConversionEnabled ? 'block' : 'none';
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error toggling fiat conversion:', e);
+        }
+    }
+
+    function changeCurrency() {
+        try {
+            selectedCurrency = document.getElementById('currencySelect').value;
+            localStorage.setItem('currency', selectedCurrency);
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error changing currency:', e);
+        }
+    }
+
+    function loadFiatConversionPreference() {
+        try {
+            const fiatConversion = localStorage.getItem('fiatConversion');
+            isFiatConversionEnabled = fiatConversion === null ? true : fiatConversion === 'true';
+            document.getElementById('fiatToggle').checked = isFiatConversionEnabled;
+            document.getElementById('currencySelectContainer').style.display = isFiatConversionEnabled ? 'block' : 'none';
+            updateFiatValues();
+        } catch (e) {
+            console.error('Error loading fiat conversion preference:', e);
+            isFiatConversionEnabled = true;
+            document.getElementById('fiatToggle').checked = true;
+            document.getElementById('currencySelectContainer').style.display = 'block';
+            updateFiatValues();
+        }
+    }
+
+    function calculateGlobalNextReward(prizePool) {
+        try {
+            let prizePoolNum = parseFloat(prizePool) || 0;
+            if (isNaN(prizePoolNum) || prizePoolNum === 0) {
+                console.warn('Prize pool is invalid or zero, using fallback value');
+                prizePoolNum = 5085600;
+            }
+            const nextReward = prizePoolNum * 0.000416667;
+            return Math.floor(nextReward);
+        } catch (e) {
+            console.error('Error calculating global next reward:', e);
+            return 0;
+        }
+    }
+
+    function resetPrizePool() {
+        try {
+            document.getElementById('currentPrizePool').value = formatWithCommas(defaultPrizePool);
+            currentPrizePool = defaultPrizePool;
+            calculatePlayerRewards();
+            checkIfModified();
+        } catch (e) {
+            console.error('Error resetting prize pool:', e);
+        }
+    }
+
+    function resetHashrate() {
+        try {
+            // If average hashrate is on, turn it off and update toggle/UI
+            if (useAverageHashrate) {
+                useAverageHashrate = false;
+                localStorage.setItem('useAverageHashrate', 'false');
+                const avgToggle = document.getElementById('avgHashrateToggle');
+                if (avgToggle) avgToggle.checked = false;
+
+                // Hide the period selector
+                const periodSelect = document.getElementById('avgPeriodSelect');
+                if (periodSelect) periodSelect.style.display = 'none';
+
+                updateHashrateInputState();
+            }
+            document.getElementById('currentHashrate').value = formatWithCommas(defaultHashrate);
+            currentHashrate = defaultHashrate;
+            calculatePlayerRewards();
+            calculateProfitLoss();
+            checkIfModified();
+        } catch (e) {
+            console.error('Error resetting hashrate:', e);
+        }
+    }
+
+    function resetAvgJoulesPrice(event) {
+        if (event) event.stopPropagation();
+        try {
+            isUsingCustomJoulesPrice = false;
+            localStorage.removeItem('customAvgJoulesPrice');
+
+            // Reset to calculated average
+            const input = document.getElementById('avgJoulesPrice');
+            input.value = formatWithCommas(Math.round(defaultAvgJoulesPrice));
+
+            // Recalculate profit/loss with the reset value
+            calculateProfitLoss();
+            checkIfModified();
+        } catch (e) {
+            console.error('Error resetting avg Joules price:', e);
+        }
+    }
+
+    async function toggleAverageHashrate() {
+        useAverageHashrate = document.getElementById('avgHashrateToggle').checked;
+        localStorage.setItem('useAverageHashrate', useAverageHashrate);
+
+        const input = document.getElementById('currentHashrate');
+        const periodSelect = document.getElementById('avgPeriodSelect');
+
+        if (useAverageHashrate) {
+            // Store the current hashrate before switching to average
+            previousHashrate = parseWithCommas(input.value);
+            // Show period selector
+            periodSelect.style.display = 'inline-block';
+            // Set the saved period
+            periodSelect.value = selectedPeriod;
+
+            // Immediately show loading states while fetching average hashrate
+            document.getElementById('playerNextReward').textContent = 'Loading...';
+            document.getElementById('earnings24h').textContent = 'Loading...';
+            document.getElementById('earnings7d').textContent = 'Loading...';
+            document.getElementById('earnings30d').textContent = 'Loading...';
+            document.getElementById('dailyProfitLoss').textContent = 'Loading...';
+            updateFiatValues();
+            checkIfModified();
+        } else {
+            // Hide period selector
+            periodSelect.style.display = 'none';
+        }
+
+        await updateHashrateInputState();
+        calculatePlayerRewards();
+        calculateProfitLoss();
+    }
+
+    async function updateAverageHashrate() {
+        selectedPeriod = document.getElementById('avgPeriodSelect').value;
+        localStorage.setItem('avgHashratePeriod', selectedPeriod);
+
+        // Show loading states while updating average hashrate for new period
+        document.getElementById('playerNextReward').textContent = 'Loading...';
+        document.getElementById('earnings24h').textContent = 'Loading...';
+        document.getElementById('earnings7d').textContent = 'Loading...';
+        document.getElementById('earnings30d').textContent = 'Loading...';
+        document.getElementById('dailyProfitLoss').textContent = 'Loading...';
+        updateFiatValues();
+
+        await updateHashrateInputState();
+        calculatePlayerRewards();
+        calculateProfitLoss();
+    }
+
+async function updateHashrateInputState() {
+    const input = document.getElementById('currentHashrate');
+    const hashrateLabel = document.getElementById('hashrateLabel');
+
+    if (useAverageHashrate) {
+        input.disabled = false;
+        isAvgHashrateLoading = true;
+
+        // Update label and show loading state immediately
+        const periodText = selectedPeriod === '24h' ? '24h' :
+                         selectedPeriod === '7d' ? '7d' : '30d';
+        hashrateLabel.textContent = `Average Hashrate (${periodText})`;
+        input.value = 'Loading...';
+
+        // Also show loading for daily P/L
+        document.getElementById('dailyProfitLoss').textContent = 'Loading...';
+
+        try {
+            // Check if we have a cached value in localStorage first
+            const cachedKey = `avgHashrate_${selectedPeriod}`;
+            const cachedValue = localStorage.getItem(cachedKey);
+            const cacheTimestampKey = `${cachedKey}_timestamp`;
+            const cacheTimestamp = localStorage.getItem(cacheTimestampKey);
+            const cacheMaxAge = 30 * 60 * 1000; // 30 minutes
+
+            // Use cached value if it exists and is not too old
+            if (cachedValue && cacheTimestamp &&
+                (Date.now() - parseInt(cacheTimestamp)) < cacheMaxAge) {
+                averageHashrate = parseFloat(cachedValue);
+                input.value = formatWithCommas(Math.round(averageHashrate));
+                currentHashrate = averageHashrate;
+            } else {
+                // Get average hashrate for selected period
+                let avgHashrate;
+                switch(selectedPeriod) {
+                    case '24h':
+                        avgHashrate = await window.getAverageHashrate24h();
+                        break;
+                    case '7d':
+                        avgHashrate = await window.getAverageHashrate7d();
+                        break;
+                    case '30d':
+                        avgHashrate = await window.getAverageHashrate30d();
+                        break;
+                    default:
+                        avgHashrate = await window.getAverageHashrate7d();
+                        break;
+                }
+
+                if (avgHashrate !== undefined && avgHashrate !== null) {
+                    averageHashrate = avgHashrate;
+                    input.value = formatWithCommas(Math.round(averageHashrate));
+                    currentHashrate = averageHashrate;
+
+                    // Cache the value in localStorage
+                    localStorage.setItem(cachedKey, averageHashrate.toString());
+                    localStorage.setItem(cacheTimestampKey, Date.now().toString());
+                } else {
+                    console.error('Failed to get average hashrate for period:', selectedPeriod);
+                    input.value = 'Error';
+                    // Reset P/L loading state on error
+                    document.getElementById('dailyProfitLoss').textContent = 'Error';
+                }
+            }
+
+            // Update formula values if popups are open
+            if (document.getElementById('yourRewardPopup').style.display === 'block') {
+                updateFormulaValues('yourReward');
+            }
+
+            // Always update all formula values to keep them current
+            updateAllFormulaValues();
+        } catch (error) {
+            console.error('Error getting average hashrate:', error);
+            input.value = 'Error';
+            // Reset P/L loading state on error
+            document.getElementById('dailyProfitLoss').textContent = 'Error';
+        } finally {
+            isAvgHashrateLoading = false;
+        }
+    } else {
+        input.disabled = false;
+        hashrateLabel.textContent = 'Current Hashrate';
+
+        // Restore the previous hashrate when disabling average hashrate
+        if (previousHashrate && previousHashrate > 0) {
+            input.value = formatWithCommas(previousHashrate);
+            currentHashrate = previousHashrate;
+        } else if (defaultHashrate) {
+            // Fallback to default hashrate if no previous value
+            input.value = formatWithCommas(defaultHashrate);
+            currentHashrate = defaultHashrate;
+        }
+        previousHashrate = null; // Clear the stored previous hashrate
+
+        // Always update all formula values to keep them current
+        updateAllFormulaValues();
+    }
+}
+
+function calculatePlayerRewards() {
+    try {
+        playerHashrate = parseWithCommas(document.getElementById('playerHashrate').value);
+        currentPrizePool = parseWithCommas(document.getElementById('currentPrizePool').value);
+        if (useAverageHashrate) {
+            if (averageHashrate == null) {
+                document.getElementById('playerNextReward').textContent = 'Loading...';
+                document.getElementById('earnings24h').textContent = 'Loading...';
+                document.getElementById('earnings7d').textContent = 'Loading...';
+                document.getElementById('earnings30d').textContent = 'Loading...';
+                updateFiatValues();
+                return;
+            }
+            currentHashrate = averageHashrate;
+        } else {
+            currentHashrate = parseWithCommas(document.getElementById('currentHashrate').value);
+        }
+        const warningElement = document.getElementById('hashrateWarning');
+
+        if (playerHashrate > 0) {
+            localStorage.setItem('playerHashrate', playerHashrate);
+        } else {
+            localStorage.removeItem('playerHashrate');
+        }
+
+        if (playerHashrate < 0) {
+            warningElement.textContent = 'Please enter a valid hashrate';
+            warningElement.style.display = 'block';
+            document.getElementById('playerNextReward').textContent = '0';
+            document.getElementById('earnings24h').textContent = '0';
+            document.getElementById('earnings7d').textContent = '0';
+            document.getElementById('earnings30d').textContent = '0';
+            updateFiatValues();
+            return;
+        } else if (currentHashrate <= 0) {
+            warningElement.textContent = 'Current hashrate must be greater than 0';
+            warningElement.style.display = 'block';
+            document.getElementById('playerNextReward').textContent = '0';
+            document.getElementById('earnings24h').textContent = '0';
+            document.getElementById('earnings7d').textContent = '0';
+            document.getElementById('earnings30d').textContent = '0';
+            updateFiatValues();
+            return;
+        }
+
+        const globalNextReward = calculateGlobalNextReward(currentPrizePool);
+        document.getElementById('globalNextReward').textContent = globalNextReward.toLocaleString('en-US');
+
+        // Update formula values if popups are open
+        if (document.getElementById('globalRewardPopup').style.display === 'block') {
+            updateFormulaValues('globalReward');
+        }
+        if (document.getElementById('yourRewardPopup').style.display === 'block') {
+            updateFormulaValues('yourReward');
+        }
+
+        // Always update all formula values to keep them current
+        updateAllFormulaValues();
+
+        // Calculate minimum hashrate for 0.01 sat reward (accounting for fractional sats)
+        const minHashrate = globalNextReward > 0 ? Math.ceil(currentHashrate / (globalNextReward * 100)) : 0;
+
+        // Check if player hashrate is below minimum for 0.01 sat
+        if (playerHashrate > 0 && playerHashrate < minHashrate) {
+            warningElement.innerHTML = `Your hashrate is too low for a 0.01 sat reward.<br>Minimum hashrate for 0.01 sat: ${Math.ceil(minHashrate).toLocaleString('en-US')}.`;
+            warningElement.style.display = 'block';
+        } else if (playerHashrate > currentHashrate) {
+            warningElement.textContent = 'Your hashrate cannot exceed the current hashrate';
+            warningElement.style.display = 'block';
+        } else {
+            warningElement.textContent = '';
+            warningElement.style.display = 'block';
+        }
+
+        if (playerHashrate <= 0) {
+            document.getElementById('playerNextReward').textContent = '0';
+            document.getElementById('earnings24h').textContent = '0';
+            document.getElementById('earnings7d').textContent = '0';
+            document.getElementById('earnings30d').textContent = '0';
+            updateFiatValues();
+            return;
+        }
+
+        // Calculate player rewards with fractional values (no rounding)
+        const playerNextReward = (playerHashrate / currentHashrate) * globalNextReward;
+        document.getElementById('playerNextReward').textContent = playerNextReward.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        let remainingPrizePool = currentPrizePool || 5085600;
+        const rewardsPerDay = 24;
+        let earnings24h = 0;
+        let earnings7d = 0;
+        let earnings30d = 0;
+
+        // Calculate 24-hour earnings with fractional values
+        for (let i = 0; i < rewardsPerDay; i++) {
+            const reward = (playerHashrate / currentHashrate) * calculateGlobalNextReward(remainingPrizePool);
+            earnings24h += reward;
+            remainingPrizePool -= calculateGlobalNextReward(remainingPrizePool);
+            if (remainingPrizePool < 0) remainingPrizePool = 0;
+        }
+
+        // Calculate 7-day earnings with fractional values
+        for (let i = rewardsPerDay; i < rewardsPerDay * 7; i++) {
+            const reward = (playerHashrate / currentHashrate) * calculateGlobalNextReward(remainingPrizePool);
+            earnings7d += reward;
+            remainingPrizePool -= calculateGlobalNextReward(remainingPrizePool);
+            if (remainingPrizePool < 0) remainingPrizePool = 0;
+        }
+        earnings7d += earnings24h;
+
+        // Calculate 30-day earnings with fractional values
+        for (let i = rewardsPerDay * 7; i < rewardsPerDay * 30; i++) {
+            const reward = (playerHashrate / currentHashrate) * calculateGlobalNextReward(remainingPrizePool);
+            earnings30d += reward;
+            remainingPrizePool -= calculateGlobalNextReward(remainingPrizePool);
+            if (remainingPrizePool < 0) remainingPrizePool = 0;
+        }
+        earnings30d += earnings7d;
+
+        document.getElementById('earnings24h').textContent = earnings24h.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('earnings7d').textContent = earnings7d.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('earnings30d').textContent = earnings30d.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        updateFiatValues();
+    } catch (e) {
+        console.error('Error calculating player rewards:', e);
+        ['playerNextReward', 'earnings24h', 'earnings7d', 'earnings30d'].forEach(id => {
+            document.getElementById(id).textContent = 'Error';
+        });
+        updateFiatValues();
+    }
+}
+
+async function initializeData() {
+    try {
+        const data = await getCachedData();
+        defaultPrizePool = parseFloat(data.prizePool.replace(/,/g, '')) || 0;
+        defaultHashrate = parseFloat(data.hashrate.replace(/,/g, '')) || 0;
+        currentPrizePool = defaultPrizePool;
+        if (useAverageHashrate) {
+            // Set initial loading states for all dependent calculations
+            document.getElementById('currentHashrate').value = 'Loading...';
+            document.getElementById('playerNextReward').textContent = 'Loading...';
+            document.getElementById('earnings24h').textContent = 'Loading...';
+            document.getElementById('earnings7d').textContent = 'Loading...';
+            document.getElementById('earnings30d').textContent = 'Loading...';
+            document.getElementById('dailyProfitLoss').textContent = 'Loading...';
+            updateFiatValues();
+            await updateHashrateInputState();
+        } else {
+            currentHashrate = defaultHashrate;
+            document.getElementById('currentHashrate').value = formatWithCommas(defaultHashrate);
+            await updateHashrateInputState();
+        }
+        document.getElementById('currentPrizePool').value = formatWithCommas(defaultPrizePool);
+        document.getElementById('globalNextReward').textContent = calculateGlobalNextReward(defaultPrizePool).toLocaleString('en-US');
+
+        const savedHashrate = localStorage.getItem('playerHashrate');
+        if (savedHashrate) {
+            const savedHashrateInt = parseInt(savedHashrate);
+            document.getElementById('playerHashrate').value = formatWithCommas(savedHashrateInt);
+            playerHashrate = savedHashrateInt;
+        } else {
+            document.getElementById('playerHashrate').value = formatWithCommas(250);
+            playerHashrate = 250;
+        }
+
+        // Initialize ASIC count and Joules calculation
+        document.getElementById('asicCount').value = asicCount;
+        calculateJoulesConsumption();
+
+        // Initialize Joules pricing and profit/loss
+        await calculateAverageJoulesPrice(data);
+        await calculateProfitLoss(data);
+
+        await fetchBTCPrices();
+        loadFiatConversionPreference();
+        calculatePlayerRewards();
+
+        // Initialize formula values after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            updateAllFormulaValues();
+        }, 100);
+
+        loadCustomJoulesPrice();
+    } catch (e) {
+        console.error('Error initializing data:', e);
+        document.getElementById('currentPrizePool').value = '0';
+        document.getElementById('currentHashrate').value = '0';
+        document.getElementById('globalNextReward').textContent = 'Error';
+        document.getElementById('playerNextReward').textContent = 'Error';
+        document.getElementById('earnings24h').textContent = 'Error';
+        document.getElementById('earnings7d').textContent = 'Error';
+        document.getElementById('earnings30d').textContent = 'Error';
+        document.getElementById('hashrateWarning').textContent = 'Error';
+        updateFiatValues();
+    }
+}
+
+    const debouncedCalculatePlayerRewards = debounce(calculatePlayerRewards, 150);
+    const debouncedCalculateProfitLoss = debounce(calculateProfitLoss, 300);
+    document.getElementById('playerHashrate').addEventListener('input', () => {
+        formatInputValue(document.getElementById('playerHashrate'));
+        debouncedCalculatePlayerRewards();
+        debouncedCalculateProfitLoss();
+
+        // Update formula values if popups are open
+        if (document.getElementById('yourRewardPopup').style.display === 'block') {
+            updateFormulaValues('yourReward');
+        }
+
+        // Always update all formula values to keep them current
+        updateAllFormulaValues();
+    });
+    document.getElementById('currentPrizePool').addEventListener('input', () => {
+        formatInputValue(document.getElementById('currentPrizePool'));
+        debouncedCalculatePlayerRewards();
+        debouncedCalculateProfitLoss();
+        checkIfModified();
+
+        // Update formula values if popups are open
+        if (document.getElementById('globalRewardPopup').style.display === 'block') {
+            updateFormulaValues('globalReward');
+        }
+        if (document.getElementById('yourRewardPopup').style.display === 'block') {
+            updateFormulaValues('yourReward');
+        }
+
+        // Always update all formula values to keep them current
+        updateAllFormulaValues();
+    });
+    document.getElementById('currentHashrate').addEventListener('input', () => {
+        checkIfModified();
+        formatInputValue(document.getElementById('currentHashrate'));
+        currentHashrate = parseWithCommas(document.getElementById('currentHashrate').value);
+
+        // If average hashrate is enabled and user changes the input, disable the toggle
+        if (useAverageHashrate) {
+            const input = document.getElementById('currentHashrate');
+            const currentValue = parseWithCommas(input.value);
+            const avgValue = Math.round(averageHashrate || 0);
+
+            // If the user has changed the value from the average hashrate, disable the toggle
+            if (currentValue !== avgValue) {
+                useAverageHashrate = false;
+                localStorage.setItem('useAverageHashrate', 'false');
+                document.getElementById('avgHashrateToggle').checked = false;
+
+                // Update the UI to reflect the change
+                const hashrateLabel = document.getElementById('hashrateLabel');
+                const periodSelect = document.getElementById('avgPeriodSelect');
+
+                hashrateLabel.textContent = 'Current Hashrate';
+                periodSelect.style.display = 'none';
+
+                // Clear any existing note if present
+                const note = document.getElementById('avgHashrateNote');
+                if (note) note.style.display = 'none';
+            }
+        }
+
+        // Make sure to recalculate player rewards with the new hashrate
+        debouncedCalculatePlayerRewards();
+
+        // Update profit/loss calculation when global hashrate changes
+        debouncedCalculateProfitLoss();
+
+        // Update formula values if popups are open
+        if (document.getElementById('yourRewardPopup').style.display === 'block') {
+            updateFormulaValues('yourReward');
+        }
+
+        // Always update all formula values to keep them current
+        updateAllFormulaValues();
+    });
+    document.getElementById('asicCount').addEventListener('input', calculateJoulesConsumption);
+
+
+    function toggleMenu() {
+        const menuContent = document.getElementById('menuContent');
+        if (menuContent) {
+            menuContent.classList.toggle('show');
+        }
+    }
+
+    function closeMenuOnOutsideClick(event) {
+        const menuContent = document.getElementById('menuContent');
+        const menuToggle = document.querySelector('.menu');
+        if (!menuContent || !menuToggle) return;
+        if (menuContent.classList.contains('show')) {
+            if (!menuContent.contains(event.target) && !menuToggle.contains(event.target)) {
+                menuContent.classList.remove('show');
+            }
+        }
+    }
+
+    function toggleDarkMode() {
+        try {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            document.getElementById('themeToggle').checked = isDarkMode;
+        } catch (e) {
+            console.error('Error toggling dark mode:', e);
+        }
+    }
+
+    function loadDarkModePreference() {
+        try {
+            const darkMode = localStorage.getItem('darkMode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (darkMode === 'true') {
+                document.body.classList.add('dark-mode');
+                if (themeToggle) themeToggle.checked = true;
+            } else {
+                if (themeToggle) themeToggle.checked = false;
+            }
+        } catch (e) {
+            console.error('Error loading dark mode preference:', e);
+        }
+    }
+
+    function changeTimezone() {
+        try {
+            currentTimezone = document.getElementById('timezoneSelect').value;
+            localStorage.setItem('timezone', currentTimezone);
+        } catch (e) {
+            console.error('Error changing timezone:', e);
+        }
+    }
+
+    function changeTimeFormat() {
+        try {
+            timeFormat = document.getElementById('timeFormatSelect').value;
+            localStorage.setItem('timeFormat', timeFormat);
+        } catch (e) {
+            console.error('Error changing time format:', e);
+        }
+    }
+
+    function calculateJoulesConsumption() {
+        try {
+            asicCount = parseInt(document.getElementById('asicCount').value) || 0;
+            const joulesPerAsicPerDay = 200;
+            const dailyJoules = asicCount * joulesPerAsicPerDay;
+
+            document.getElementById('dailyJoules').textContent = dailyJoules.toLocaleString('en-US');
+
+            // Save to localStorage
+            localStorage.setItem('asicCount', asicCount);
+
+            // Update profit/loss calculation
+            calculateProfitLoss();
+        } catch (e) {
+            console.error('Error calculating Joules consumption:', e);
+            document.getElementById('dailyJoules').textContent = '0';
+        }
+    }
+
+    async function calculateAverageJoulesPrice(data = null) {
+        try {
+            const now = Date.now();
+
+            // Check if user has set a custom price
+            if (isUsingCustomJoulesPrice) {
+                const customPrice = parseWithCommas(document.getElementById('avgJoulesPrice').value);
+                if (customPrice > 0) {
+                    return customPrice;
+                }
+            }
+
+            if (cachedAvgJoulesPriceValue !== null && (now - cachedAvgJoulesPriceTimestamp) < AVG_JOULES_PRICE_TTL_MS) {
+                setDefaultAvgJoulesPrice(cachedAvgJoulesPriceValue);
+                // Update popup metrics from cache if available
+                if (window.avgJoulesDetails) populateAvgJoulesPopupFromDetails(window.avgJoulesDetails);
+                return cachedAvgJoulesPriceValue;
+            }
+
+            // If no data provided, fetch it
+            if (!data) {
+                data = await getCachedData();
+            }
+            const auctionData = JSON.parse(data.auctionData || '[]');
+            const ahHistoryData = JSON.parse(data.ahHistoryData || '[]');
+
+            // Check if data is empty or invalid
+            if (!auctionData && !ahHistoryData) {
+                console.warn('No auction data available, using fallback value');
+                return setDefaultAvgJoulesPrice(325);
+            }
+
+            // Separate current offers and past sales
+            const currentOffers = auctionData.filter(entry => entry.item === 'Joules');
+            const pastSales = ahHistoryData.filter(entry => entry.item === 'Joules');
+
+            // Helper function to calculate price per 10,000 Joules
+            const calculateUnitPrice = (entry) => {
+                const price = parseFloat(entry.price.replace(/,/g, '')) || 0;
+                const quantity = parseFloat(entry.quantity.replace(/,/g, '')) || 1;
+                return (price / quantity) * 10000; // Price per 10,000 Joules
+            };
+
+            // Get the 5 most recent past sales
+            const recentSales = pastSales
+                .map(entry => ({
+                    ...entry,
+                    unitPrice: calculateUnitPrice(entry),
+                    time: new Date(entry.time)
+                }))
+                .filter(entry => entry.unitPrice > 0 && isFinite(entry.unitPrice))
+                .sort((a, b) => b.time - a.time) // Sort by time, newest first
+                .slice(0, 5); // Take only the 5 most recent
+
+            if (recentSales.length === 0) {
+                console.warn('No recent sales data found, using fallback value');
+                return setDefaultAvgJoulesPrice(325);
+            }
+
+            // Calculate average of recent sales
+            const recentSalesAvg = recentSales.reduce((sum, entry) => sum + entry.unitPrice, 0) / recentSales.length;
+
+            // Get all valid current offers (no filtering by proximity to recent sales)
+            const validOffers = currentOffers
+                .map(entry => ({
+                    ...entry,
+                    unitPrice: calculateUnitPrice(entry)
+                }))
+                .filter(entry => entry.unitPrice > 0 && isFinite(entry.unitPrice))
+                .sort((a, b) => a.unitPrice - b.unitPrice) // Sort by price, lowest first
+                .slice(0, 5); // Take only the 5 best offers
+
+            // Combine recent sales and valid offers
+            const allValidData = [...recentSales, ...validOffers];
+
+            if (allValidData.length === 0) {
+                // If no valid offers, use only recent sales
+                const salesOnlyAvg = recentSales.reduce((sum, entry) => sum + entry.unitPrice, 0) / recentSales.length;
+                return setDefaultAvgJoulesPrice(salesOnlyAvg);
+            }
+
+            // Calculate weighted average (recent sales have more weight)
+            const salesWeight = 0.7; // 70% weight for recent sales
+            const offersWeight = 0.3; // 30% weight for current offers
+
+            const salesAvg = recentSales.reduce((sum, entry) => sum + entry.unitPrice, 0) / recentSales.length;
+            const offersAvg = validOffers.length > 0
+                ? validOffers.reduce((sum, entry) => sum + entry.unitPrice, 0) / validOffers.length
+                : salesAvg;
+
+            const weightedAverage = (salesAvg * salesWeight) + (offersAvg * offersWeight);
+
+            setDefaultAvgJoulesPrice(weightedAverage);
+            cachedAvgJoulesPriceValue = weightedAverage;
+            cachedAvgJoulesPriceTimestamp = now;
+            // Store details for popup rendering
+            window.avgJoulesDetails = {
+                recentSales: recentSales.map(e => ({
+                    unitPrice: e.unitPrice,
+                    price: e.price,
+                    quantity: e.quantity,
+                    time: e.time instanceof Date ? e.time : new Date(e.time)
+                })),
+                validOffers: validOffers.map(e => ({
+                    unitPrice: e.unitPrice,
+                    price: e.price,
+                    quantity: e.quantity
+                })),
+                salesAvg,
+                offersAvg,
+                weightedAverage
+            };
+            populateAvgJoulesPopupFromDetails(window.avgJoulesDetails);
+
+            return weightedAverage;
+        } catch (e) {
+            console.error('Error calculating average Joules price:', e);
+            console.warn('Using fallback value due to calculation error');
+            return setDefaultAvgJoulesPrice(325);
+        }
+    }
+
+    async function calculateProfitLoss(data = null) {
+        try {
+            const dailyJoules = parseInt(document.getElementById('dailyJoules').textContent.replace(/,/g, '')) || 0;
+
+            // Get the price from input (either custom or calculated)
+            let avgPrice;
+            if (isUsingCustomJoulesPrice) {
+                avgPrice = parseWithCommas(document.getElementById('avgJoulesPrice').value);
+            } else {
+                avgPrice = await calculateAverageJoulesPrice(data);
+            }
+
+            const playerHashrate = parseWithCommas(document.getElementById('playerHashrate').value);
+
+            // Check if average hashrate is still loading
+            if (useAverageHashrate && (isAvgHashrateLoading || averageHashrate == null)) {
+                document.getElementById('dailyProfitLoss').textContent = 'Loading...';
+                return;
+            }
+
+            if (dailyJoules === 0 || avgPrice === 0) {
+                document.getElementById('dailyProfitLoss').textContent = 'N/A';
+                return;
+            }
+
+            // Calculate earnings from using Joules (mining)
+            const miningEarnings = calculateMiningEarnings(playerHashrate);
+
+            // Calculate earnings from selling Joules
+            const joulesUnits = dailyJoules / 10000;
+            const sellingEarnings = joulesUnits * avgPrice;
+
+            // Calculate the difference: mining earnings - selling earnings
+            const profitLoss = miningEarnings - sellingEarnings;
+
+            const profitLossElement = document.getElementById('dailyProfitLoss');
+            if (profitLoss > 0) {
+                profitLossElement.textContent = `+${Math.round(profitLoss).toLocaleString('en-US')}`;
+                profitLossElement.style.color = '#4CAF50'; // Green for profit (mining is better)
+            } else if (profitLoss < 0) {
+                profitLossElement.textContent = `${Math.round(profitLoss).toLocaleString('en-US')}`;
+                profitLossElement.style.color = '#f44336'; // Red for loss (selling is better)
+            } else {
+                profitLossElement.textContent = '0';
+                profitLossElement.style.color = 'inherit';
+            }
+        } catch (e) {
+            console.error('Error calculating profit/loss:', e);
+            document.getElementById('dailyProfitLoss').textContent = 'Error';
+        }
+    }
+
+    function calculateMiningEarnings(hashrate) {
+        try {
+            // Get current values from the calculator
+            const currentPrizePool = parseWithCommas(document.getElementById('currentPrizePool').value);
+            const currentHashrate = parseWithCommas(document.getElementById('currentHashrate').value);
+
+            if (hashrate <= 0 || currentHashrate <= 0) {
+                return 0;
+            }
+
+            // Calculate 24-hour mining earnings using the same logic as the main calculator
+            const globalNextReward = calculateGlobalNextReward(currentPrizePool);
+            const rewardsPerDay = 24;
+            let remainingPrizePool = currentPrizePool || 5085600;
+            let earnings24h = 0;
+
+            // Calculate 24-hour earnings
+            for (let i = 0; i < rewardsPerDay; i++) {
+                const reward = Math.floor((hashrate / currentHashrate) * calculateGlobalNextReward(remainingPrizePool));
+                earnings24h += reward;
+                remainingPrizePool -= calculateGlobalNextReward(remainingPrizePool);
+                if (remainingPrizePool < 0) remainingPrizePool = 0;
+            }
+
+            return earnings24h;
+        } catch (e) {
+            console.error('Error calculating mining earnings:', e);
+            return 0;
+        }
+    }
+
+    // Simple P/L Breakdown Popup Functions
+    function toggleProfitLossBreakdown() {
+        try {
+            const popup = document.getElementById('plBreakdownPopup');
+            if (!popup) return;
+
+            const isVisible = popup.style.display === 'block';
+
+            if (isVisible) {
+                popup.style.display = 'none';
+            } else {
+                // Calculate and populate the breakdown data
+                populateSimpleBreakdown();
+                popup.style.display = 'block';
+            }
+        } catch (e) {
+            console.error('Error toggling profit/loss breakdown:', e);
+        }
+    }
+
+    function populateSimpleBreakdown() {
+        try {
+            // Get current values
+            const playerHashrate = parseWithCommas(document.getElementById('playerHashrate').value);
+            const dailyJoulesText = document.getElementById('dailyJoules').textContent;
+            const dailyJoules = parseInt(dailyJoulesText.replace(/,/g, '')) || 0;
+            const avgJoulesPrice = parseWithCommas(document.getElementById('avgJoulesPrice').value);
+
+            // Calculate power cost (daily joules * avg price per 10k joules)
+            const joulesUnits = dailyJoules / 10000;
+            const powerCost = joulesUnits * avgJoulesPrice;
+
+            // Calculate mining earnings
+            const miningEarnings = calculateMiningEarnings(playerHashrate);
+
+            // Calculate net P/L
+            const netPL = miningEarnings - powerCost;
+
+            // Use the SAME rounded value that's displayed in the main box
+            const displayedPL = document.getElementById('dailyProfitLoss').textContent;
+            const displayedValue = displayedPL.startsWith('+') ?
+                displayedPL.substring(1) : displayedPL;
+
+            // Populate popup
+            document.getElementById('popupPowerCost').textContent = Math.round(powerCost).toLocaleString('en-US') + ' sats';
+            document.getElementById('popupMiningEarnings').textContent = Math.round(miningEarnings).toLocaleString('en-US') + ' sats';
+
+            // Use the same value as displayed in the main box
+            const netElement = document.getElementById('popupNetPL');
+            netElement.textContent = displayedPL + ' sats';
+            netElement.style.color = netPL > 0 ? '#4CAF50' : netPL < 0 ? '#f44336' : 'inherit';
+
+        } catch (e) {
+            console.error('Error populating simple breakdown:', e);
+            document.getElementById('popupPowerCost').textContent = 'Error';
+            document.getElementById('popupMiningEarnings').textContent = 'Error';
+            document.getElementById('popupNetPL').textContent = 'Error';
+        }
+    }
+
+    // Formula popup functions
+    function toggleFormulaPopup(popupId) {
+        try {
+            const popup = document.getElementById(popupId + 'Popup');
+            if (!popup) {
+                console.error('Popup element not found:', popupId + 'Popup');
+                return;
+            }
+
+            const isVisible = popup.style.display === 'block';
+
+            if (isVisible) {
+                popup.style.display = 'none';
+                // Remove popup-open class from the card
+                const card = popup.closest('.clickable-card');
+                if (card) card.classList.remove('popup-open');
+            } else {
+                // Close any other open formula popups first
+                document.querySelectorAll('.formula-popup').forEach(p => {
+                    p.style.display = 'none';
+                    // Remove popup-open class from all cards
+                    const card = p.closest('.clickable-card');
+                    if (card) card.classList.remove('popup-open');
+                });
+
+                // Update formula values with current data before showing
+                updateFormulaValues(popupId);
+
+                popup.style.display = 'block';
+
+                // Add popup-open class to the current card
+                const card = popup.closest('.clickable-card');
+                if (card) {
+                    card.classList.add('popup-open');
+                }
+
+                // Position the popup to ensure it's visible
+                setTimeout(() => positionFormulaPopup(popupId), 10);
+            }
+        } catch (e) {
+            console.error('Error toggling formula popup:', e);
+        }
+    }
+
+    function updateFormulaValues(popupId) {
+        try {
+            if (popupId === 'globalReward') {
+                // Update global reward formula values
+                const currentPrizePool = parseWithCommas(document.getElementById('currentPrizePool').value) || 0;
+                const globalReward = calculateGlobalNextReward(currentPrizePool);
+
+
+                // Only update elements that exist in the HTML
+                const formulaPrizePoolValue = document.getElementById('formulaPrizePoolValue');
+                const formulaGlobalResult = document.getElementById('formulaGlobalResult');
+
+                if (formulaPrizePoolValue) {
+                    formulaPrizePoolValue.textContent = formatWithCommas(Math.round(currentPrizePool));
+                }
+                if (formulaGlobalResult) {
+                    formulaGlobalResult.textContent = formatWithCommas(Math.round(globalReward));
+                }
+            } else if (popupId === 'yourReward') {
+                // Update your reward formula values
+                const playerHashrate = parseWithCommas(document.getElementById('playerHashrate').value) || 0;
+                const currentHashrate = useAverageHashrate ? (averageHashrate || 0) : parseWithCommas(document.getElementById('currentHashrate').value) || 0;
+                const currentPrizePool = parseWithCommas(document.getElementById('currentPrizePool').value) || 0;
+                const globalReward = calculateGlobalNextReward(currentPrizePool);
+                const playerReward = Math.floor((playerHashrate / currentHashrate) * globalReward);
+
+
+                // Only update elements that exist in the HTML
+                const formulaPlayerHashrateValue = document.getElementById('formulaPlayerHashrateValue');
+                const formulaTotalHashrateValue = document.getElementById('formulaTotalHashrateValue');
+                const formulaGlobalRewardValue = document.getElementById('formulaGlobalRewardValue');
+                const formulaPlayerResult = document.getElementById('formulaPlayerResult');
+
+                if (formulaPlayerHashrateValue) {
+                    formulaPlayerHashrateValue.textContent = formatWithCommas(Math.round(playerHashrate));
+                }
+                if (formulaTotalHashrateValue) {
+                    formulaTotalHashrateValue.textContent = formatWithCommas(Math.round(currentHashrate));
+                }
+                if (formulaGlobalRewardValue) {
+                    formulaGlobalRewardValue.textContent = formatWithCommas(Math.round(globalReward));
+                }
+                if (formulaPlayerResult) {
+                    formulaPlayerResult.textContent = formatWithCommas(Math.round(playerReward));
+                }
+            }
+        } catch (e) {
+            console.error('Error updating formula values:', e);
+        }
+    }
+
+    // Function to update all formula values regardless of popup state
+    function updateAllFormulaValues() {
+        try {
+            // Always update global reward formula values
+            const currentPrizePool = parseWithCommas(document.getElementById('currentPrizePool').value) || 0;
+            const globalReward = calculateGlobalNextReward(currentPrizePool);
+
+            // Only update elements that exist in the HTML
+            const formulaPrizePoolValue = document.getElementById('formulaPrizePoolValue');
+            const formulaGlobalResult = document.getElementById('formulaGlobalResult');
+
+            if (formulaPrizePoolValue) {
+                formulaPrizePoolValue.textContent = formatWithCommas(Math.round(currentPrizePool));
+            }
+            if (formulaGlobalResult) {
+                formulaGlobalResult.textContent = formatWithCommas(Math.round(globalReward));
+            }
+
+            // Always update your reward formula values
+            const playerHashrate = parseWithCommas(document.getElementById('playerHashrate').value) || 0;
+            const currentHashrate = useAverageHashrate ? (averageHashrate || 0) : parseWithCommas(document.getElementById('currentHashrate').value) || 0;
+            const playerReward = Math.floor((playerHashrate / currentHashrate) * globalReward);
+
+            // Only update elements that exist in the HTML
+            const formulaPlayerHashrateValue = document.getElementById('formulaPlayerHashrateValue');
+            const formulaTotalHashrateValue = document.getElementById('formulaTotalHashrateValue');
+            const formulaGlobalRewardValue = document.getElementById('formulaGlobalRewardValue');
+            const formulaPlayerResult = document.getElementById('formulaPlayerResult');
+
+            if (formulaPlayerHashrateValue) {
+                formulaPlayerHashrateValue.textContent = formatWithCommas(Math.round(playerHashrate));
+            }
+            if (formulaTotalHashrateValue) {
+                formulaTotalHashrateValue.textContent = formatWithCommas(Math.round(currentHashrate));
+            }
+            if (formulaGlobalRewardValue) {
+                formulaGlobalRewardValue.textContent = formatWithCommas(Math.round(globalReward));
+            }
+            if (formulaPlayerResult) {
+                formulaPlayerResult.textContent = formatWithCommas(Math.round(playerReward));
+            }
+        } catch (e) {
+            console.error('Error updating all formula values:', e);
+        }
+    }
+
+    function positionFormulaPopup(popupId) {
+        try {
+            const popup = document.getElementById(popupId + 'Popup');
+            if (!popup) {
+                console.error('Popup element not found for positioning:', popupId + 'Popup');
+                return;
+            }
+
+            const card = popup.closest('.clickable-card');
+            if (!card) {
+                console.error('Card element not found for popup:', popupId);
+                return;
+            }
+
+            const cardRect = card.getBoundingClientRect();
+            const popupRect = popup.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+
+
+            // Check if popup would go below viewport
+            if (cardRect.bottom + popupRect.height > viewportHeight) {
+                // Position popup above the card
+                popup.style.top = 'auto';
+                popup.style.bottom = '100%';
+                popup.style.marginTop = '0';
+                popup.style.marginBottom = '8px';
+                popup.classList.add('above');
+            } else {
+                // Position popup below the card (default)
+                popup.style.top = '100%';
+                popup.style.bottom = 'auto';
+                popup.style.marginTop = '8px';
+                popup.style.marginBottom = '0';
+                popup.classList.remove('above');
+            }
+        } catch (e) {
+            console.error('Error positioning formula popup:', e);
+        }
+    }
+
+    // Close popup when clicking outside
+    document.addEventListener('click', function(event) {
+        const popup = document.getElementById('plBreakdownPopup');
+        const box = document.getElementById('dailyPLBox');
+
+        if (popup && popup.style.display === 'block') {
+            if (!box.contains(event.target)) {
+                popup.style.display = 'none';
+            }
+        }
+
+        // Close formula popups when clicking outside
+        const formulaPopups = document.querySelectorAll('.formula-popup');
+        formulaPopups.forEach(popup => {
+            if (popup.style.display === 'block') {
+                const card = popup.closest('.clickable-card');
+                if (card && !card.contains(event.target)) {
+                    popup.style.display = 'none';
+                    // Remove popup-open class
+                    card.classList.remove('popup-open');
+                }
+            }
+        });
+
+        // Close Avg Joules popup when clicking outside
+        const avgPopup = document.getElementById('avgJoulesPopup');
+        if (avgPopup && avgPopup.style.display === 'block') {
+            const container = avgPopup.closest('.avg-joules-box');
+            if (container && !container.contains(event.target)) {
+                avgPopup.style.display = 'none';
+                container.classList.remove('popup-open');
+                document.body.classList.remove('popup-open');
+            }
+        }
+    });
+
+    // Avg Joules popup functions
+    function toggleAvgJoulesPopup(event) {
+        try {
+            event.stopPropagation();
+            const popup = document.getElementById('avgJoulesPopup');
+            if (!popup) return;
+            const container = popup.closest('.avg-joules-box');
+            const isVisible = popup.style.display === 'block';
+            if (isVisible) {
+                popup.style.display = 'none';
+                if (container) container.classList.remove('popup-open');
+            } else {
+                // Ensure details are populated
+                if (window.avgJoulesDetails) {
+                    populateAvgJoulesPopupFromDetails(window.avgJoulesDetails);
+                }
+                popup.style.display = 'block';
+                // Apply saved details visibility
+                const pref = localStorage.getItem('avgJoulesShowDetails');
+                const details = document.getElementById('avgJoulesDetails');
+                const toggle = popup.querySelector('.avg-joules-toggle');
+                const show = pref === 'true';
+                if (details && toggle) {
+                    details.style.display = show ? 'grid' : 'none';
+                    toggle.textContent = show ? 'Hide details' : 'Show details';
+                }
+                if (container) container.classList.add('popup-open');
+            }
+        } catch (e) {
+            console.error('Error toggling Avg Joules popup:', e);
+        }
+    }
+
+    function populateAvgJoulesPopupFromDetails(details) {
+        try {
+            const toCurrency = (n) => Math.round(n).toLocaleString('en-US') + ' sats';
+            const salesAvgEl = document.getElementById('avgJoulesSalesAvg');
+            const offersAvgEl = document.getElementById('avgJoulesOffersAvg');
+            const weightedEl = document.getElementById('avgJoulesWeighted');
+            if (salesAvgEl) salesAvgEl.textContent = toCurrency(details.salesAvg || 0);
+            if (offersAvgEl) offersAvgEl.textContent = toCurrency(details.offersAvg || 0);
+            if (weightedEl) weightedEl.textContent = toCurrency(details.weightedAverage || 0);
+
+            const recentSalesEl = document.getElementById('avgJoulesRecentSales');
+            const currentOffersEl = document.getElementById('avgJoulesCurrentOffers');
+
+            if (recentSalesEl) {
+                if (details.recentSales && details.recentSales.length) {
+                    const header = `<div class="avg-row"><span><strong>Quantity</strong></span><span><strong>Price</strong></span><span><strong>Price for 10k</strong></span></div>`;
+                    const rows = details.recentSales.map(s => {
+                        return `<div class="avg-row"><span>${s.quantity} qty</span><span>${s.price} sats</span><span>${toCurrency(s.unitPrice)}</span></div>`;
+                    }).join('');
+                    recentSalesEl.innerHTML = header + rows;
+                } else {
+                    recentSalesEl.textContent = 'No recent sales';
+                }
+            }
+
+            if (currentOffersEl) {
+                if (details.validOffers && details.validOffers.length) {
+                    const header = `<div class="avg-row"><span><strong>Quantity</strong></span><span><strong>Price</strong></span><span><strong>Price for 10k</strong></span></div>`;
+                    const rows = details.validOffers.map(o => {
+                        return `<div class="avg-row"><span>${o.quantity} qty</span><span>${o.price} sats</span><span>${toCurrency(o.unitPrice)}</span></div>`;
+                    }).join('');
+                    currentOffersEl.innerHTML = header + rows;
+                } else {
+                    currentOffersEl.textContent = 'No current offers close to market';
+                }
+            }
+        } catch (e) {
+            console.error('Error populating Avg Joules popup:', e);
+        }
+    }
+
+    function toggleAvgJoulesDetails(event) {
+        event.stopPropagation();
+        const details = document.getElementById('avgJoulesDetails');
+        const toggle = document.querySelector('.avg-joules-toggle');
+
+        if (details.style.display === 'grid') {
+            details.style.display = 'none';
+            toggle.textContent = 'Show details';
+            document.body.classList.remove('popup-open'); // Remove class when details are hidden
+        } else {
+            details.style.display = 'grid';
+            toggle.textContent = 'Hide details';
+            document.body.classList.add('popup-open'); // Add class when details are shown
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        document.querySelectorAll('.menu-content a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('data-scroll-target');
+                if (target) scrollToSection(target);
+                const menuContent = document.getElementById('menuContent');
+                if (menuContent) menuContent.classList.remove('show');
+            });
+        });
+        const menuContent = document.getElementById('menuContent');
+        if (menuContent) {
+            menuContent.addEventListener('click', e => e.stopPropagation());
+        }
+        document.addEventListener('click', closeMenuOnOutsideClick);
+        loadDarkModePreference();
+        loadFiatConversionPreference();
+        // Set avg hashrate toggle state on load
+        const avgToggle = document.getElementById('avgHashrateToggle');
+        const periodSelect = document.getElementById('avgPeriodSelect');
+        if (avgToggle) {
+            avgToggle.checked = useAverageHashrate;
+        }
+        if (periodSelect) {
+            // Show/hide period selector based on stored preference
+            periodSelect.style.display = useAverageHashrate ? 'inline-block' : 'none';
+            if (useAverageHashrate) {
+                periodSelect.value = selectedPeriod;
+            }
+        }
+        await updateHashrateInputState();
+        initializeData();
+
+        // Add window resize listener to reposition formula popups
+        window.addEventListener('resize', () => {
+            if (document.getElementById('globalRewardPopup').style.display === 'block') {
+                positionFormulaPopup('globalReward');
+            }
+            if (document.getElementById('yourRewardPopup').style.display === 'block') {
+                positionFormulaPopup('yourReward');
+            }
+        });
+
+        // Add scroll listener to reposition formula popups
+        window.addEventListener('scroll', () => {
+            if (document.getElementById('globalRewardPopup').style.display === 'block') {
+                positionFormulaPopup('globalReward');
+            }
+            if (document.getElementById('yourRewardPopup').style.display === 'block') {
+                positionFormulaPopup('yourReward');
+            }
+        });
+
+        // Initialize tooltips for formula cards
+        initializeTooltips();
+    });
+
+    // Initialize tooltips for formula cards
+    function initializeTooltips() {
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+            const tooltipText = tooltip.querySelector('.tooltiptext');
+            const infoIcon = tooltip.querySelector('.info-icon');
+
+            if (infoIcon && tooltipText) {
+                infoIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Toggle the show class
+                    tooltipText.classList.toggle('show');
+                });
+
+                // Close tooltip when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!tooltip.contains(e.target) && tooltipText.classList.contains('show')) {
+                        tooltipText.classList.remove('show');
+                    }
+                });
+            }
+        });
+    }
+
+   function checkIfModified() {
+    const prizePoolInput = document.getElementById('currentPrizePool');
+    const hashrateInput = document.getElementById('currentHashrate');
+    const prizePoolCard = prizePoolInput.closest('.input-card');
+    const hashrateCard = hashrateInput.closest('.input-card');
+
+    // Check if prize pool is modified
+    const currentPrizePoolValue = parseWithCommas(prizePoolInput.value);
+    if (currentPrizePoolValue !== defaultPrizePool && currentPrizePoolValue !== 0) {
+        prizePoolCard.classList.add('modified');
+    } else {
+        prizePoolCard.classList.remove('modified');
+    }
+
+    // Check if hashrate is modified (only if not using average hashrate)
+    if (!useAverageHashrate) {
+        const currentHashrateValue = parseWithCommas(hashrateInput.value);
+        if (currentHashrateValue !== defaultHashrate && currentHashrateValue !== 0) {
+            hashrateCard.classList.add('modified');
+        } else {
+            hashrateCard.classList.remove('modified');
+        }
+    } else {
+        // Remove modified class when using average hashrate
+        hashrateCard.classList.remove('modified');
+    }
+}
+
+// Add event listener for the avg Joules price input
+const debouncedCalculateProfitLossForJoules = debounce(calculateProfitLoss, 300);
+document.getElementById('avgJoulesPrice').addEventListener('input', () => {
+    formatInputValue(document.getElementById('avgJoulesPrice'));
+    const customPrice = parseWithCommas(document.getElementById('avgJoulesPrice').value);
+
+    // Check if user has modified the calculated value
+    if (customPrice !== Math.round(defaultAvgJoulesPrice)) {
+        isUsingCustomJoulesPrice = true;
+        localStorage.setItem('customAvgJoulesPrice', customPrice);
+    } else {
+        isUsingCustomJoulesPrice = false;
+        localStorage.removeItem('customAvgJoulesPrice');
+    }
+
+    debouncedCalculateProfitLossForJoules();
+    checkIfModified();
+});
+
+function loadCustomJoulesPrice() {
+    try {
+        const customPrice = localStorage.getItem('customAvgJoulesPrice');
+        if (customPrice) {
+            isUsingCustomJoulesPrice = true;
+            document.getElementById('avgJoulesPrice').value = formatWithCommas(parseInt(customPrice));
+            calculateProfitLoss();
+        }
+    } catch (e) {
+        console.error('Error loading custom Joules price:', e);
+    }
+}
+
+</script>
+</body>
+</html>
